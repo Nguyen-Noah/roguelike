@@ -1,0 +1,27 @@
+{
+    "left": {
+        "toggle": "hold",
+        "button": ["keyboard", [97]],
+        "mode": ["core"]
+    },
+    "right": {
+        "toggle": "hold",
+        "button": ["keyboard", [100]],
+        "mode": ["core"]
+    },
+    "up": {
+        "toggle": "hold",
+        "button": ["keyboard", [119]],
+        "mode": ["core"]
+    },
+    "down": {
+        "toggle": "hold",
+        "button": ["keyboard", [115]],
+        "mode": ["core"]
+    },
+    "dash": {
+        "toggle": "press",
+        "button": ["keyboard", [32]],
+        "mode": ["core"]
+    }
+}

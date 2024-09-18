@@ -5,4 +5,4 @@ class Renderer:
         self.game = game
 
     def cycle(self):
-        pass
+        pygame.draw.circle(self.game.window.display, 'red', (10, 10), 5)
