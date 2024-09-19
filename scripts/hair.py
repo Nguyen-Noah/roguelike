@@ -1,12 +1,4 @@
-from .primitives import vec2
-
-def lerp(v1, v2, t):
-    return vec2(v1.x + t * (v2.x - v1.x), v1.y + t * (v2.y - v1.y))
-
-
-"""
-REFERENCE VIDEO: https://www.youtube.com/watch?v=imkT4kFP43k
-"""
+from .utils import lerp, normalize, magnitude
 
 class HairPart:
     def __init__(self, game, target, img, main_hair_part=False):
@@ -23,7 +15,7 @@ class HairPart:
         self._player_movement = None
         self._ready = False
 
-        self.position = vec2(0, 0)
+        self.position = [0, 0]
 
     def init_hair(self, owner):
         self._player_movement = owner
@@ -43,22 +35,20 @@ class HairPart:
             return
         
         # applying gravity
-        self.position = vec2(self.position.x, self.position.y + self.gravity)
+        self.position[1] = self.position[1] + self.gravity
 
-        difference = vec2(self.position - self.target.position)
-        direction = vec2(difference.normalize())
-        dist = min(self.max_distance, difference.magnitude())
+        difference = (self.position[0] - self.target.position[0], self.position[1] - self.target.position[1])
+        direction = normalize(difference)
+        dist = min(self.max_distance, magnitude(difference))
 
-        # FIX THIS IN VEC2 CLASS TO SUPPORT TUPLE-FLOAT OPERATIONS
-        final_pos = vec2(self.target.position.x + direction.x * dist, self.target.position.y + direction.y * dist)
+        final_pos = (self.target.position[0] + direction[0] * dist, self.target.position[1] + direction[1] * dist)
 
-        new_position_lerped = vec2(lerp(final_pos, self.target.position, dt * self.lerp_speed))
+        new_position_lerped = lerp(final_pos, self.target.position, dt * self.lerp_speed)
 
         self.position = new_position_lerped
 
-    def render(self, surf):
-        #surf.blit(self.img, self.position.tuple)
-        self.game.renderer.blit(self.img, self.position.tuple)
+        # rendering
+        self.game.renderer.blit(self.img, self.position)
 
 class Hair:
     """
@@ -88,34 +78,12 @@ class Hair:
     def update(self, dt):
         for segment in self.hair_segments:
             segment.update(dt)
-            segment.render()
+            self.debug()
 
     def debug(self):
         print('--------------------')
         for i, segment in enumerate(self.hair_segments):
             print(f'Segment {i} at position: {segment.position}')
-
-""" example usage:
-    class Player:
-        def __init__(self, game, var1, var2):
-            self.game = game
-            self.var1 = var1
-            self.var2 = var2
-
-            self.hair_gravity = None        <- delegate function to change the gravity of each segment
-            self.hair = Hair(game, self)    <- game is only needed to access the assets used for each hair segment, can be changed to asset folder for simplification
-
-        def update(self, dt):
-            update player
-
-            if self.is_grounded:
-                self.hair_gravity(-.1)
-            else:
-                self.hair_gravity(-.025)
-            self.hair.update(dt)
-
-        def render(surf):
-            self.hair.render(surf) """
 
 hair_offsets = {
     "path": "idle",
