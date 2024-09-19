@@ -1,8 +1,15 @@
 import pygame, os
+from .animation_handler import AnimationManager
+
+PATH = 'data/graphics'
 
 class Assets:
     def __init__(self, game):
         self.game = game
+
+        self.animations = AnimationManager()
+        self.temp = self.load_dir(f'{PATH}/temp')
+        self.hair = self.load_dir(f'{PATH}/hair')
 
     def load_dirs(self, path):
         dirs = {}
