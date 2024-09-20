@@ -7,9 +7,10 @@ class EntityData:
     def __init__(self, config, animations={}):
         self.config = config
         self.assets = load_img_directory(self.config['file_path'], colorkey=self.config['colorkey'])
+        print(self.assets)
         self.animations = animations
         for animation in self.config['animations']:
-            if animation in self.assets['animations']:
+            if animation in self.assets:
                 frame1_name = list(self.assets[animation])[0]
                 frame_i = frame1_name.split('_')[-1]
                 if len(frame_i) and frame_i.isnumeric():

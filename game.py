@@ -9,12 +9,12 @@ from scripts.entity_db import EntityDB
 class Game:
     def __init__(self):
         self.window = Window(self)
+        self.entity_db = EntityDB(path='data/graphics/entities')
         self.assets = Assets(self)
         self.input = Input(self)
         self.renderer = Renderer(self)
         self.world = World(self)
         self.audio = Audio()
-        self.entity_db = EntityDB()
 
     def update(self):
         self.input.update()

@@ -27,7 +27,7 @@ class Window:
         # blitting surfs
         self.screen = pygame.display.set_mode(self.scaled_resolution, pygame.OPENGL | pygame.DOUBLEBUF)
         self.display = pygame.Surface(self.base_resolution)
-        self.subpixel_surf = pygame.Surface(self.scaled_resolution)
+        self.s_display = pygame.Surface(self.scaled_resolution)
         self.mgl = MGL()
 
     def render_frame(self):
