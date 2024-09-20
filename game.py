@@ -4,6 +4,7 @@ from scripts.renderer import Renderer
 from scripts.world import World
 from scripts.assets import Assets
 from scripts.audio import Audio
+from scripts.entity_db import EntityDB
 
 class Game:
     def __init__(self):
@@ -13,6 +14,7 @@ class Game:
         self.renderer = Renderer(self)
         self.world = World(self)
         self.audio = Audio()
+        self.entity_db = EntityDB()
 
     def update(self):
         self.input.update()

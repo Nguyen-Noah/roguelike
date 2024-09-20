@@ -1,5 +1,4 @@
 import pygame, os
-from .animation_handler import AnimationManager
 
 PATH = 'data/graphics'
 
@@ -7,7 +6,6 @@ class Assets:
     def __init__(self, game):
         self.game = game
 
-        self.animations = AnimationManager()
         self.temp = self.load_dir(f'{PATH}/temp')
         self.hair = self.load_dir(f'{PATH}/hair')
 
@@ -20,10 +18,10 @@ class Assets:
     def load_dir(self, path):
         image_dir = {}
         for file in os.listdir(path):
-            image_dir[file.split('.')[0]] = self.load_img(path + '/' + file, (0, 0, 0))
+            image_dir[file.split('.')[0]] = self.load_img(path + '/' + file, colorkey=(255, 255, 255))
         return image_dir
     
-    def load_img(self, path, colorkey):
+    def load_img(self, path, colorkey=(0, 0, 0)):
         img = pygame.image.load(path).convert_alpha()
         img.set_colorkey(colorkey)
         return img

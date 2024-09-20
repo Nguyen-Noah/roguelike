@@ -15,7 +15,7 @@ class HairPart:
         self._player_movement = None
         self._ready = False
 
-        self.position = [0, 0]
+        self.pos = [0, 0]
 
     def init_hair(self, owner):
         self._player_movement = owner
@@ -35,20 +35,20 @@ class HairPart:
             return
         
         # applying gravity
-        self.position[1] = self.position[1] + self.gravity
+        self.pos[1] = self.pos[1] + self.gravity
 
-        difference = (self.position[0] - self.target.position[0], self.position[1] - self.target.position[1])
+        difference = (self.pos[0] - self.target.pos[0], self.pos[1] - self.target.pos[1])
         direction = normalize(difference)
         dist = min(self.max_distance, magnitude(difference))
 
-        final_pos = (self.target.position[0] + direction[0] * dist, self.target.position[1] + direction[1] * dist)
+        final_pos = (self.target.pos[0] + direction[0] * dist, self.target.pos[1] + direction[1] * dist)
 
-        new_position_lerped = lerp(final_pos, self.target.position, dt * self.lerp_speed)
+        new_pos_lerped = lerp(final_pos, self.target.pos, dt * self.lerp_speed)
 
-        self.position = new_position_lerped
+        self.pos = new_pos_lerped
 
         # rendering
-        self.game.renderer.blit(self.img, self.position)
+        self.game.renderer.blit(self.img, self.pos)
 
 class Hair:
     """
@@ -83,7 +83,7 @@ class Hair:
     def debug(self):
         print('--------------------')
         for i, segment in enumerate(self.hair_segments):
-            print(f'Segment {i} at position: {segment.position}')
+            print(f'Segment {i} at pos: {segment.pos}')
 
 hair_offsets = {
     "path": "idle",

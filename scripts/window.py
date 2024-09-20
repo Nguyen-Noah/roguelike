@@ -11,7 +11,7 @@ class Window:
         # screen resolution
         self.scaled_resolution = config['window']['scaled_resolution']
         self.base_resolution = config['window']['base_resolution']
-        self.scale_ratio = self.scaled_resolution[0] // self.base_resolution
+        self.scale_ratio = self.scaled_resolution[0] // self.base_resolution[0]
 
         # opengl
         pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)

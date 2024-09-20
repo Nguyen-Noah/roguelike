@@ -21,7 +21,6 @@ class World:
         self.offgrid_tiles = map_data['offgrid']
 
     def update(self, offset=(0, 0)):
-        self.player.update(1/ 60)
 
         # rendering
         surf = self.game.window.display
@@ -34,3 +33,5 @@ class World:
                 if loc in self.tilemap:
                     tile = self.tilemap[loc]
                     self.game.renderer.blit(self.game.assets.temp[tile['type']], (tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+
+        self.player.update(1/60)

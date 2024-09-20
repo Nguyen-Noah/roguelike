@@ -9,6 +9,7 @@ class Input:
 
         self.states = {}
         self.mouse_pos = (0, 0)
+        self.mouse_pos = (0, 0)
 
         self.input_mode = 'core'
 
@@ -41,10 +42,6 @@ class Input:
 
         for binding in self.mouse_state:
             self.mouse_state[binding] = False
-
-    def get_mouse_pos(self):
-        mx, my = pygame.mouse.get_pos()
-        self.mouse_pos = (int(mx / self.game.window.scaled_resolution[0] * self.game.window.base_resolution[0]), int(my / self.game.window.scaled_resolution[1] * self.game.window.base_resolution[1]))
 
     def update(self):
         x, y = pygame.mouse.get_pos()
