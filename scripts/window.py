@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 from .config import config
 from .mgl.mgl import MGL
 
@@ -23,6 +23,7 @@ class Window:
         self.fps = config['window']['fps']
         self.clock = pygame.time.Clock()
         self.dt = 1 / self.fps
+        self.time = time.time()
 
         # blitting surfs
         self.screen = pygame.display.set_mode(self.scaled_resolution, pygame.OPENGL | pygame.DOUBLEBUF)
@@ -35,3 +36,4 @@ class Window:
         self.mgl.render(self.display)
         self.clock.tick(self.fps)
         self.display.fill((0, 0, 0))
+        self.time = time.time()

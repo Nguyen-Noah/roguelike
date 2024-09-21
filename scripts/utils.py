@@ -76,3 +76,10 @@ def palette_swap(surf, colors):
         surf = dest
     surf.set_colorkey(colorkey)
     return surf
+
+def collision_list(obj, obj_list):
+    hit_list = []
+    for r in obj_list:
+        if obj.colliderect(r):
+            hit_list.append(r)
+    return hit_list

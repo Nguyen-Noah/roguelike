@@ -16,6 +16,7 @@ class Entity:
         self.source = ANIMATIONS if self.action in self.animations else 'images'
         self.animation = None if self.source != ANIMATIONS else self.animations[self.action].copy()
         self.size = self.config['size']
+        self.dead = False
 
         # rendering options
         self.opacity = 255

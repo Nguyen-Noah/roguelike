@@ -3,6 +3,8 @@ import pygame, json
 NEIGHBOR_OFFSETS = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (0, 0), (-1, 1), (0, 1), (1, 1)]
 PHYSICS_TILES = {'temp'}
 AUTOTILE_TYPES = {'temp'}
+TILES_AROUND = [(0, 0), (1, 0), (-1, 0), (0, -1), (1, -1), (-1, -1), (0, 1), (1, 1), (-1, 1)]
+
 
 class Tilemap:
     def __init__(self, game, tile_size=8):
@@ -21,6 +23,17 @@ class Tilemap:
                 tiles.append(self.tilemap[check_loc])
         
         return tiles
+
+    def solids_around(self, pos_px, include_gaps=True):
+        pos = (int(pos_px[0] // self.tile_size), int(pos_px[1] // self.tile_size))
+        solids = []
+        for offset in TILES_AROUND:
+            check = (pos[0] + offset[0], pos[1] + offset[1])
+            if check in self.solids:
+                solids.append(self.solids[check])
+            elif include_gaps and (check in self.gaps):
+                solids.append(self.gaps[check])
+        return solids
     
     def physics_rects_around(self, pos):
         rects = []

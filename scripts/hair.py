@@ -47,7 +47,9 @@ class HairPart:
 
         self.pos = new_pos_lerped
 
-        # rendering
+        self.render()
+
+    def render(self):
         self.game.renderer.blit(self.img, self.pos)
 
 class Hair:
@@ -78,7 +80,6 @@ class Hair:
     def update(self, dt):
         for segment in self.hair_segments:
             segment.update(dt)
-            self.debug()
 
     def debug(self):
         print('--------------------')
