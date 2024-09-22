@@ -57,7 +57,7 @@ class EntityDB:
                     config['animations'][animation] = {'offset': [0, 0], 'speed': 1.0, 'loop': True, 'paused': False, 'frames': []}
                     for frame in frames:
                         if frame.split('.')[-1] == 'png':
-                            config['animations'][animation]['frames'].append(0.1)
+                            config['animations'][animation]['frames'].append(1)
             
             if not config['default']:
                 if len(animations):

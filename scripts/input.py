@@ -94,9 +94,6 @@ class Input:
 
     def released(self, key):
         return self.input[key].just_released if key in self.input else False
-
-    def movement(self):
-        pass
     
     def set_text_buffer(self, text_buffer=None):
         self.text_buffer = text_buffer

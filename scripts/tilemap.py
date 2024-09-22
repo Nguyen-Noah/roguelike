@@ -6,12 +6,45 @@ AUTOTILE_TYPES = {'temp'}
 TILES_AROUND = [(0, 0), (1, 0), (-1, 0), (0, -1), (1, -1), (-1, -1), (0, 1), (1, 1), (-1, 1)]
 
 
+class Tile:
+    def __init__(self, group, tile_id=(0, 0), pos=(0, 0), layer=0, custom_data=''):
+        self.group = group
+        self.tile_id = tile_id
+
+    def change_id(self, tile_id):
+        self.tile_id = tile_id
+        self.img
+
 class Tilemap:
-    def __init__(self, game, tile_size=8):
+    def __init__(self, game, tile_size=16, dimensions=(16, 16)):
         self.game = game
         self.tile_size = tile_size
-        self.tilemap = {}
+        self.dimensions = tuple(dimensions)
+        self.grid_tiles = {}
         self.offgrid_tiles = []
+
+    def save(self, path):
+        output = {
+            'tile_size': self.tile_size,
+            'grid_tiles': {},
+            'offgrid_tiles': self.offgrid_tiles,
+            'dimensions': self.dimensions
+            }
+        for loc in self.grid_tiles:
+            output['grid_tiles'][loc] = {}
+            for layer in self.grid_tiles[loc]:
+                output['grid_tiles'][loc][layer] = self.grid_tiles[loc][layer].export()
+        
+
+    def load_map(self):
+        self.clear()
+
+
+    def clear(self):
+        self.floor = {}
+        self.walls = {}
+        self.solids = {}
+        self.gaps = {}
 
     # takes pixel positions, not grid position
     def get_tiles_around(self, pos):

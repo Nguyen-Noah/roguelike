@@ -83,3 +83,7 @@ def collision_list(obj, obj_list):
         if obj.colliderect(r):
             hit_list.append(r)
     return hit_list
+
+def smooth_approach(val, target, dt, slowness=1):
+    val += (target - val) / slowness * min(dt, slowness)
+    return val
