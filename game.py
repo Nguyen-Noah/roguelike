@@ -23,8 +23,7 @@ class Game:
         self.window.render_frame()
         self.world.update()
         self.renderer.cycle({
-            'default': self.window.display,
-            'subpixel': self.window.s_display
+            'default': self.window.display
             })
 
     def run(self):

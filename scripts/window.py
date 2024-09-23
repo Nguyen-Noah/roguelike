@@ -9,9 +9,8 @@ class Window:
         pygame.init()
 
         # screen resolution
-        self.scaled_resolution = config['window']['scaled_resolution']
-        self.base_resolution = config['window']['base_resolution']
-        self.scale_ratio = self.scaled_resolution[0] // self.base_resolution[0]
+        self.resolution = config['window']['resolution']
+        self.scale_ratio = config['window']['scale_ratio']
         self.offset = (0, 0)
 
         # opengl
@@ -27,9 +26,8 @@ class Window:
         self.time = time.time()
 
         # blitting surfs
-        self.screen = pygame.display.set_mode(self.scaled_resolution, pygame.OPENGL | pygame.DOUBLEBUF)
-        self.display = pygame.Surface(self.base_resolution)
-        self.s_display = pygame.Surface(self.scaled_resolution)
+        self.screen = pygame.display.set_mode(self.resolution, pygame.OPENGL | pygame.DOUBLEBUF)
+        self.display = pygame.Surface(self.resolution)
         self.mgl = MGL()
 
     def render_frame(self):

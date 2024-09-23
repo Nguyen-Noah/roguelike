@@ -24,5 +24,6 @@ class Assets:
     
     def load_img(self, path, colorkey=(0, 0, 0)):
         img = pygame.image.load(path).convert_alpha()
+        img = pygame.transform.scale(img, (img.width * self.game.window.scale_ratio, img.height * self.game.window.scale_ratio))
         img.set_colorkey(colorkey)
         return img

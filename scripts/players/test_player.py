@@ -1,5 +1,4 @@
 import pygame, math
-from ..hair import Hair
 from ..rigidbody import RigidBody
 from ..animation import Animation
 from ..weapons.wood_sword import WoodSword
@@ -9,7 +8,6 @@ class Player(RigidBody):
         super().__init__(game, type, [40, 40])
         self.game = game
         self.hair_gravity = None
-        self.hair = Hair(game, self)
         self.weapon = WoodSword(game, 'wooden_sword', self)
 
     def update(self, dt):
@@ -54,8 +52,6 @@ class Player(RigidBody):
 
         self.weapon.update(dt)
         self.handle_turn()
-        self.hair_gravity(-.025)
-        self.hair.update(dt)
 
     def render(self, offset=(0, 0)):
         self.game.renderer.blit(self.img, (self.pos[0] - offset[0], self.pos[1] - offset[1]))

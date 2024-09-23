@@ -41,8 +41,12 @@ class World:
             self.game.renderer.blit(self.game.assets.temp[tile['type']], (tile['pos'][0] - offset[0], tile['pos'][1] - offset[1]))
 
         for x in range(offset[0] // self.tile_size, (offset[0] + surf.get_width()) // self.tile_size + 1):
+            print(x)
             for y in range(offset[1] // self.tile_size, (offset[1] + surf.get_height()) // self.tile_size + 1):
                 loc = str(x) + ';' + str(y)
                 if loc in self.tilemap:
                     tile = self.tilemap[loc]
-                    self.game.renderer.blit(self.game.assets.temp[tile['type']], (tile['pos'][0] * self.tile_size - offset[0], tile['pos'][1] * self.tile_size - offset[1]))
+                    self.game.renderer.blit(self.game.assets.temp[tile['type']], 
+                                            (tile['pos'][0] * (self.tile_size * self.game.window.scale_ratio) - offset[0], 
+                                             tile['pos'][1] * (self.tile_size * self.game.window.scale_ratio) - offset[1])
+                                            )
