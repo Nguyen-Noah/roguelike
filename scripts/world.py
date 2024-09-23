@@ -13,8 +13,8 @@ class World:
         self.tilemap = Tilemap(game)
         self.load('data/maps/map.json')
 
-        self.camera = Camera(game, game.window.base_resolution, slowness=2)
-        self.camera.set_target(self.player)
+        self.camera = Camera(game)
+        self.camera.set_tracked_entity(self.player)
 
     def load(self, path):
         f = open(path, 'r')

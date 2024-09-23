@@ -7,7 +7,8 @@ class Assets:
         self.game = game
 
         self.temp = self.load_dir(f'{PATH}/temp')
-        self.hair = self.load_dir(f'{PATH}/hair')
+        self.hair = self.load_dir(f'{PATH}/hair', colorkey=(255, 255, 255))
+        self.weapons = self.load_dir(f'{PATH}/weapons')
 
     def load_dirs(self, path):
         dirs = {}
@@ -15,10 +16,10 @@ class Assets:
             dirs[dir] = self.load_dir(path + '/' + dir)
         return dirs
 
-    def load_dir(self, path):
+    def load_dir(self, path, colorkey=(0, 0, 0)):
         image_dir = {}
         for file in os.listdir(path):
-            image_dir[file.split('.')[0]] = self.load_img(path + '/' + file, colorkey=(255, 255, 255))
+            image_dir[file.split('.')[0]] = self.load_img(path + '/' + file, colorkey=colorkey)
         return image_dir
     
     def load_img(self, path, colorkey=(0, 0, 0)):

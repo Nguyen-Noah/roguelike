@@ -16,11 +16,16 @@ class Game:
         self.world = World(self)
         self.audio = Audio()
 
+        self.renderer.set_groups(['default', 'subpixel'])
+
     def update(self):
         self.input.update()
         self.window.render_frame()
         self.world.update()
-        self.renderer.cycle({'default': self.window.display})
+        self.renderer.cycle({
+            'default': self.window.display,
+            'subpixel': self.window.s_display
+            })
 
     def run(self):
         while True:

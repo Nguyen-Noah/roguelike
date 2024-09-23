@@ -2,6 +2,7 @@ import pygame, math
 from ..hair import Hair
 from ..rigidbody import RigidBody
 from ..animation import Animation
+from ..weapons.wood_sword import WoodSword
 
 class Player(RigidBody):
     def __init__(self, game, type):
@@ -9,6 +10,7 @@ class Player(RigidBody):
         self.game = game
         self.hair_gravity = None
         self.hair = Hair(game, self)
+        self.weapon = WoodSword(game, 'wooden_sword', self)
 
     def update(self, dt):
         super().update(dt)
@@ -38,6 +40,11 @@ class Player(RigidBody):
                 movement[0] /= math.sqrt(2)
                 movement[1] /= math.sqrt(2)
 
+            angle = math.atan2(self.game.input.mouse.pos[1] - self.center[1] + self.game.world.camera.render_offset[1], self.game.input.mouse.pos[0] - self.center[0] + self.game.world.camera.render_offset[0])
+            self.aim_angle = angle
+            if self.weapon:
+                self.weapon.rotation = math.degrees(angle)
+
         self.physics_update(movement)
 
         if any(self.frame_dir):
@@ -45,12 +52,14 @@ class Player(RigidBody):
         else:
             self.set_action('idle')
 
+        self.weapon.update(dt)
         self.handle_turn()
         self.hair_gravity(-.025)
         self.hair.update(dt)
 
     def render(self, offset=(0, 0)):
         self.game.renderer.blit(self.img, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
+        self.weapon.render(self.center, offset)
 
     def debug(self):
         print(self.action)
