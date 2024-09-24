@@ -1,6 +1,6 @@
-from .types.shortsword import Shortsword
+from .types.greataxe import Greataxe
 
-class WoodSword(Shortsword):
+class IronAxe(Greataxe):
     def update(self, dt):
         super().update(dt)
 

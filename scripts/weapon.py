@@ -20,6 +20,10 @@ class Weapon:
 
         self.invisible = 0
 
+        self.attacking = False
+
+        self.static_angle = False
+
     def reset_combo(self):
         self.combo = 0
 

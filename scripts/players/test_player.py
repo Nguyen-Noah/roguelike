@@ -1,14 +1,14 @@
 import pygame, math
 from ..rigidbody import RigidBody
 from ..animation import Animation
-from ..weapons.wood_sword import WoodSword
+from ..weapons.iron_axe import IronAxe
 
 class Player(RigidBody):
     def __init__(self, game, type):
         super().__init__(game, type, [40, 40])
         self.game = game
         self.hair_gravity = None
-        self.weapon = WoodSword(game, 'wooden_sword', self)
+        self.weapon = IronAxe(game, 'iron_axe', self)
 
     def update(self, dt):
         super().update(dt)
@@ -41,7 +41,7 @@ class Player(RigidBody):
             # -------------------------------- MOUSE ANGLE
             angle = math.atan2(self.game.input.mouse.pos[1] - self.center[1] + self.game.world.camera.render_offset[1], self.game.input.mouse.pos[0] - self.center[0] + self.game.world.camera.render_offset[0])
             self.aim_angle = angle
-            if self.weapon:
+            if self.weapon and not self.weapon.static_angle:
                 self.weapon.rotation = math.degrees(angle)
 
             # --------------------------------- TURN

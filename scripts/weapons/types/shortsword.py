@@ -7,7 +7,6 @@ def lerp(a, b, t):
 class Shortsword(Weapon):
     def __init__(self, game, weapon_type, owner):
         super().__init__(game, weapon_type, owner)
-        self.offset = (0, 0)
         self.swing_speed = 20
 
         self.swing = -1
@@ -15,8 +14,6 @@ class Shortsword(Weapon):
         self.target = 0
         self.weapon_angle = -134
         self.swinging = False
-
-        self.attacking = False
 
     def process_swing(self, dt):
         self.swing_angle = lerp(self.swing_angle, self.swing * 135, dt * self.swing_speed)
