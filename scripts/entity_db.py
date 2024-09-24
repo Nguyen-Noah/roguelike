@@ -7,7 +7,6 @@ class EntityData:
     def __init__(self, config, animations={}):
         self.config = config
         self.assets = load_img_directory(self.config['file_path'], colorkey=self.config['colorkey'])
-        print(self.assets)
         self.animations = animations
         for animation in self.config['animations']:
             if animation in self.assets:

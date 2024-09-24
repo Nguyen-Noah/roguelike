@@ -20,7 +20,7 @@ class Entity:
 
         # rendering options
         self.opacity = 255
-        self.scale = [1, 1]
+        self.scale = [self.game.window.scale_ratio, self.game.window.scale_ratio]
         self.rotation = 0
         self.flip = [False, False]
         self.visible = True

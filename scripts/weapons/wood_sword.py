@@ -2,9 +2,6 @@ import math, random
 from .types.shortsword import Shortsword
 
 class WoodSword(Shortsword):
-    def attack(self):
-        self.enable_update = True
-
     def update(self, dt):
         super().update(dt)
 

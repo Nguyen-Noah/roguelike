@@ -33,8 +33,8 @@ class Mouse:
 
     def update(self):
         x, y = pygame.mouse.get_pos()
-        self.pos = (int(x / self.game.window.scaled_resolution[0] * self.game.window.base_resolution[0]), int(y / self.game.window.scaled_resolution[1] * self.game.window.base_resolution[1]))
-        self.ui_pos = (x, y)
+        #self.pos = (int(x / self.game.window.scaled_resolution[0] * self.game.window.base_resolution[0]), int(y / self.game.window.scaled_resolution[1] * self.game.window.base_resolution[1]))
+        self.pos = (x, y)
 
 class Input:
     def __init__(self, game):

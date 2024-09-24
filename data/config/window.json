@@ -1,6 +1,6 @@
 {
-    "scaled_resolution": [1080, 720],
-    "base_resolution": [360, 240],
+    "resolution": [1080, 720],
     "fps": 60,
+    "scale_ratio": 3,
     "title": "placeholder"
 }

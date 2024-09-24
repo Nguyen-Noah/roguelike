@@ -1,6 +1,6 @@
 {
     "player": {
-        "max_run_speed": 1.6,
+        "max_run_speed": 5,
         "run_accel_rate": 12,
         "run_deccel_rate": 20,
         "do_conserve_momentum": true

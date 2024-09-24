@@ -1,6 +1,8 @@
 import pygame, math
 from ...weapon import Weapon
-from ...utils import lerp
+
+def lerp(a, b, t):
+    return a + (b - a) * t
 
 class Shortsword(Weapon):
     def __init__(self, game, weapon_type, owner):
@@ -27,7 +29,12 @@ class Shortsword(Weapon):
 
         self.weapon_angle = self.swing_angle
 
+    def attempt_attack(self):
+        if super().attempt_attack():
+            self.swing *= -1
+
     def update(self, dt):
+        super().update(dt)
         if self.attacking:
             self.process_swing(dt)
 
@@ -45,5 +52,10 @@ class Shortsword(Weapon):
                 angle_offset = 20
 
             img = pygame.transform.rotate(img, -self.rotation + angle_offset - self.weapon_angle)
-            render_pos = (loc[0] - (img.width // 2) + (math.cos(math.radians(self.rotation + self.weapon_angle)) * 10) - offset[0], loc[1] - (img.get_height() // 2) - (math.sin(math.radians(-self.rotation - self.weapon_angle)) * 10) - offset[1])
-            self.game.renderer.blit(img, render_pos, group='subpixel')
+            sword_dist = 25
+            render_pos = (loc[0] - (img.width // 2) + (math.cos(math.radians(self.rotation + self.weapon_angle)) * sword_dist) - offset[0], loc[1] - (img.get_height() // 2) - (math.sin(math.radians(-self.rotation - self.weapon_angle)) * sword_dist) - offset[1])
+            self.game.renderer.blit(img, render_pos)
+
+    def debug(self):
+        print('attacking: ', self.attacking)
+        print('')
