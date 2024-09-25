@@ -1,5 +1,5 @@
 {
-    "wooden_sword": {
+    "wood_sword": {
         "attack_rate": 0.3,
         "combo": 3,
         "combo_cooldown": 30

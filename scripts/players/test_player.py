@@ -1,6 +1,7 @@
 import pygame, math
 from ..rigidbody import RigidBody
 from ..animation import Animation
+from ..weapons.wood_sword import WoodSword
 from ..weapons.iron_axe import IronAxe
 
 class Player(RigidBody):
@@ -8,7 +9,7 @@ class Player(RigidBody):
         super().__init__(game, type, [40, 40])
         self.game = game
         self.hair_gravity = None
-        self.weapon = IronAxe(game, 'iron_axe', self)
+        self.weapon = WoodSword(game, 'wood_sword', self)
 
     def update(self, dt):
         super().update(dt)
