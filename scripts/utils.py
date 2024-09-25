@@ -3,6 +3,11 @@ import math, json, pygame, os
 def lerp(v1, v2, t):
     return [v1[0] + t * (v2[0] - v1[0]), v1[1] + t * (v2[1] - v1[1])]
 
+def advance(pos, angle, amt):
+    pos[0] += math.cos(angle) * amt
+    pos[1] += math.sin(angle) * amt
+    return pos
+
 def magnitude(vec):
     return math.sqrt(vec[0] ** 2 + vec[1] ** 2)
 

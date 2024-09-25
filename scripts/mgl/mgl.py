@@ -5,7 +5,7 @@ from .render_object import RenderObject
 
 
 def read_f(path):
-    f = open(path, 'r')
+    f = open(f'scripts/mgl/shaders/{path}.glsl', 'r')
     data = f.read()
     f.close()
     return data
@@ -47,6 +47,14 @@ class MGL():
             1.0, -1.0, 1.0, 1.0,  # bottomright
         ]))
 
+        self.quad_buffer_notex = self.ctx.buffer(data=array('f', [
+            # position (x, y)
+            -1.0, 1.0,
+            -1.0, -1.0,
+            1.0, 1.0,
+            1.0, -1.0,
+        ]))
+
         self.default_vert = default_vert_shader
         self.default_frag = default_frag_shader
 
@@ -55,6 +63,7 @@ class MGL():
     def initialize(self):
         # CREATE ALL SHADER PROGRAMS/FRAMEBUFFERS ---------- #
         self.default_shader = RenderObject(self, self.default_frag, self.default_vert, vao_args=['2f 2f', 'vert', 'texcoord'], buffer=None)
+        #self.test_shader = self.create_render_object('test', 'vert')
 
     def default_ro(self):
         return RenderObject(self.default_frag, default_ro=True)
@@ -91,13 +100,13 @@ class MGL():
         new_fbo.filter = (moderngl.NEAREST, moderngl.NEAREST)
         return self.ctx.framebuffer(color_attachments=[new_fbo])
     
-    def render(self, surf):
+    def render(self, surface, time, mouse_pos):
         self.ctx.clear()
         self.ctx.enable(moderngl.BLEND)
 
         # rendering pipeline --------------- #
         self.default_shader.render(uniforms={
-            "surface": surf
+            'surface': surface
         })
 
         self.ctx.disable(moderngl.BLEND)

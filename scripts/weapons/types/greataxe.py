@@ -7,7 +7,7 @@ def lerp(a, b, t):
 class Greataxe(Weapon):
     def __init__(self, game, weapon_type, owner):
         super().__init__(game, weapon_type, owner)
-        self.offset = (-24, -18)
+        self.offset = (-12, -10)
         self.swing_speed = 20
 
         self.swing = -1
@@ -25,7 +25,7 @@ class Greataxe(Weapon):
     def update(self, dt):
         super().update(dt)
         if self.attacking:
-            print('schwing')
+            pass
 
     def render(self, loc, offset=(0, 0)):
         self.invisible = 0
@@ -35,5 +35,5 @@ class Greataxe(Weapon):
             img = pygame.transform.flip(img, flip, False)
 
             sword_dist = 25
-            render_pos = (loc[0] - (img.width // 2) + (math.cos(math.radians(self.rotation + self.weapon_angle)) * sword_dist) - offset[0] + self.offset[0], loc[1] - (img.get_height() // 2) - (math.sin(math.radians(-self.rotation - self.weapon_angle)) * sword_dist) - offset[1] + self.offset[1])
+            render_pos = (loc[0] - (img.width // 2) - offset[0] + self.offset[0], loc[1] - (img.get_height() // 2) - offset[1] + self.offset[1])
             self.game.renderer.blit(img, render_pos)

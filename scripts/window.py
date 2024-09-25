@@ -23,7 +23,7 @@ class Window:
         self.fps = config['window']['fps']
         self.clock = pygame.time.Clock()
         self.dt = 1 / self.fps
-        self.time = time.time()
+        self.time = 0
 
         # blitting surfs
         self.screen = pygame.display.set_mode(self.resolution, pygame.OPENGL | pygame.DOUBLEBUF)
@@ -31,8 +31,7 @@ class Window:
         self.mgl = MGL()
 
     def render_frame(self):
-
-        self.mgl.render(self.display)
+        self.mgl.render(self.display, self.time, self.game.input.mouse.pos)
         self.clock.tick(self.fps)
         self.display.fill((0, 0, 0))
-        self.time = time.time()
+        self.time += self.dt

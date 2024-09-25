@@ -1,13 +1,15 @@
-import pygame, math, json
+import pygame, math, json, random
 from .config import config
 from .tilemap import Tilemap
 from .players.test_player import Player
 from .camera import Camera
+from .vfx import VFX
 
 class World:
     def __init__(self, game):
         self.game = game
 
+        self.vfx = VFX(game)
         self.player = Player(game, 'player')
 
         self.tilemap = Tilemap(game)
@@ -30,9 +32,12 @@ class World:
 
         self.camera.update()
         self.player.update(dt)
+        self.vfx.update(dt)
 
         self.render(offset=self.camera.int_pos)
         self.player.render(offset=self.camera.int_pos)
+        self.vfx.render(self.game.window.display, offset=self.camera.int_pos)
+
 
     def render(self, offset=(0, 0)):
         surf = self.game.window.display
