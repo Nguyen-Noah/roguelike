@@ -34,9 +34,12 @@ class World:
         self.player.update(dt)
         self.vfx.update(dt)
 
+        if self.game.input.pressed('attack'):
+            self.vfx.spawn_vfx('arc', self.game.input.mouse.pos)
+
         self.render(offset=self.camera.int_pos)
         self.player.render(offset=self.camera.int_pos)
-        self.vfx.render(self.game.window.display, offset=self.camera.int_pos)
+        self.vfx.render(offset=self.camera.int_pos)
 
 
     def render(self, offset=(0, 0)):

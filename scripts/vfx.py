@@ -1,7 +1,7 @@
 import math, pygame
 from .utils import advance
 
-class Arc:
+class Tarc:
     def __init__(self, game, pos, radius, spacing, start_angle, speed, curve_rate, scale, start=1, end=1, duration=30, color=(255, 255, 255), fade=0.3, arc_stretch=0, width_decay=50, decay=['up', 60], angle_width=0.2, motion=0):
         self.game = game
         self.pos = list(pos)
@@ -67,7 +67,7 @@ class Arc:
             self.alive = False
 
         return self.alive
-    
+
     def render(self, surf, offset=(0, 0)):
         if self.time > 0:
             start = self.start
@@ -77,6 +77,40 @@ class Arc:
             c = [int(self.color[i] - self.color[i] * self.fade * self.time / self.duration) for i in range(3)]
             pygame.draw.polygon(surf, c, points)
 
+
+
+class Arc:
+    def __init__(self, game, pos):
+        self.game = game
+
+        self.pos = pos
+        self.color = (0, 255, 0)
+        self.size = (40, 18)
+        self.arc_width = 4
+        self.width_decay = 12
+
+        self.swipe_surf = pygame.Surface(self.size, pygame.SRCALPHA)
+        pygame.draw.ellipse(self.swipe_surf, self.color, self.swipe_surf.get_rect())
+        self.swipe_surf.set_colorkey((0, 0, 0))
+
+        self.alive = True
+    
+    def update(self, dt):
+        self.arc_width -= dt * self.width_decay
+        if self.arc_width <= 0:
+            return False
+
+        return True
+
+    def render(self, offset=(0, 0)):
+        mask_size = [self.size[0], self.size[1] - (self.size[1] // 5)]
+        mask_size[1] &= ~1      # bitwise operation to ensure the height is always even
+        mask_surf = pygame.Surface(mask_size, pygame.SRCALPHA)
+        pygame.draw.ellipse(mask_surf, (255, 0, 0), mask_surf.get_rect())
+        self.swipe_surf.blit(mask_surf, (-(mask_surf.width // 3), (self.swipe_surf.height // 2) - (mask_surf.height) // 2))
+        
+        img = pygame.transform.scale(self.swipe_surf, (self.swipe_surf.width * self.game.window.scale_ratio, self.swipe_surf.height * self.game.window.scale_ratio))
+        self.game.renderer.blit(img, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
 
 
 VFX_TYPES = {
@@ -102,6 +136,6 @@ class VFX:
                 if not alive:
                     group.pop(i)
 
-    def render(self, surf, offset=(0, 0)):
+    def render(self, offset=(0, 0)):
         for effect in self.front_effects:
-            effect.render(surf, offset)
+            effect.render(offset)
