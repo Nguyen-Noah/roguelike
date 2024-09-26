@@ -5,10 +5,12 @@ from scripts.world import World
 from scripts.assets import Assets
 from scripts.audio import Audio
 from scripts.entity_db import EntityDB
+from scripts.entity_groups import EntityGroups
 
 class Game:
     def __init__(self):
         self.window = Window(self)
+        self.entity_groups = EntityGroups(self)
         self.entity_db = EntityDB(path='data/graphics/entities')
         self.assets = Assets(self)
         self.input = Input(self)
@@ -22,6 +24,7 @@ class Game:
         self.input.update()
         self.window.render_frame()
         self.world.update()
+        self.entity_groups.update()
         self.renderer.cycle({
             'default': self.window.display
             })

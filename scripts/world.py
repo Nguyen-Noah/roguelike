@@ -18,6 +18,8 @@ class World:
         self.camera = Camera(game)
         self.camera.set_tracked_entity(self.player)
 
+        self.game.entity_groups.add(self.player, 'entities')
+
     def load(self, path):
         f = open(path, 'r')
         map_data = json.load(f)
@@ -31,16 +33,13 @@ class World:
         dt = self.game.window.dt
 
         self.camera.update()
-        self.player.update(dt)
         self.vfx.update(dt)
 
         #if self.game.input.pressed('attack'):
             #self.vfx.spawn_vfx('arc', self.game.input.mouse.pos)
 
         self.render(offset=self.camera.int_pos)
-        self.player.render(offset=self.camera.int_pos)
         self.vfx.render(offset=self.camera.int_pos)
-
 
     def render(self, offset=(0, 0)):
         surf = self.game.window.display

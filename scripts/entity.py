@@ -87,6 +87,13 @@ class Entity:
             dynamic_offset = [-size_diff[0] // 2, -size_diff[1] // 2]
             return (self.pos[0] - offset[0] + self.local_offset[0] + dynamic_offset[0], self.pos[1] - offset[1] + self.local_offset[1] + dynamic_offset[1])
         
+    def center_self(self):
+        img_size = self.img.get_size()
+        raw_img_size = self.raw_img.get_size()
+        size_diff = (img_size[0] - raw_img_size[0], img_size[1] - raw_img_size[1])
+        dynamic_offset = [-size_diff[0] // 2, -size_diff[1] // 2]
+        return (dynamic_offset[0] + self.local_offset[0], dynamic_offset[1] + self.local_offset[1])
+
     def update(self, dt):
         if self.source == ANIMATIONS:
             self.animation.update(dt)
@@ -97,10 +104,12 @@ class Entity:
 
     def renderz(self, offset=(0, 0), group='default'):
         if self.visible:
-            base_pos = self.topleft(offset)
+            dynamic_offset = self.center_self()
             if self.outline:
                 silhouette = pygame.mask.from_surface(self.img).to_surface(setcolor=self.outline, unsetcolor=(0, 0, 0, 0))
                 silhouette.set_alpha(self.opacity)
                 for offset in OFFSET_N4:
-                    self.game.renderer.blit(silhouette, (base_pos[0] + offset[0], base_pos[1] + offset[1]), z=self.z - 0.000001, group=group)
-            self.game.renderer.blit(self.img, base_pos, z=self.z, group=group)
+                    self.game.renderer.blit(silhouette, (self.pos[0] + dynamic_offset[0] - offset[0], self.pos[1] + dynamic_offset[1] - offset[1]), z=self.z - 0.000001, group=group)
+            self.game.renderer.blit(self.img, (self.pos[0] + dynamic_offset[0] - offset[0], self.pos[1] + dynamic_offset[1] - offset[1]), z=self.z, group=group)
+            if self.weapon:
+                self.weapon.render((self.center[0] + dynamic_offset[0], self.center[1] + dynamic_offset[1]), offset=offset)
