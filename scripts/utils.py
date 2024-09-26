@@ -91,3 +91,7 @@ def collision_list(obj, obj_list):
 def smooth_approach(val, target, dt, slowness=1):
     val += (target - val) / slowness * min(dt, slowness)
     return val
+
+def ease_out_cubic(t):
+    t -= 1
+    return t * t * t + 1

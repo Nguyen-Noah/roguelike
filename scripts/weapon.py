@@ -10,7 +10,7 @@ class Weapon:
         self.game = game
         self.type = weapon_type
         self.owner = owner
-        self.rotation = 0
+        self.angle = 0
 
         self.combo = 0
         self.combo_limit = config['weapons'][self.type]['combo']

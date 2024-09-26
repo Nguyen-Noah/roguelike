@@ -43,7 +43,7 @@ class Player(RigidBody):
             angle = math.atan2(self.game.input.mouse.pos[1] - self.center[1] + self.game.world.camera.render_offset[1], self.game.input.mouse.pos[0] - self.center[0] + self.game.world.camera.render_offset[0])
             self.aim_angle = angle
             if self.weapon:
-                self.weapon.rotation = math.degrees(angle)
+                self.weapon.angle = math.degrees(angle)
 
             # --------------------------------- TURN
             if (math.degrees(self.aim_angle) % 360 < 270) and (math.degrees(self.aim_angle) % 360 > 90):

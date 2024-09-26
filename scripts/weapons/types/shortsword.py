@@ -43,14 +43,14 @@ class Shortsword(Weapon):
                 img = pygame.transform.flip(img, False, False)
             else:
                 img = pygame.transform.flip(img, False, True)
-            if (self.rotation % 360 < 270) and (self.rotation % 360 > 90):
+            if (self.angle % 360 < 270) and (self.angle % 360 > 90):
                 angle_offset = -20
             else:
                 angle_offset = 20
 
-            img = pygame.transform.rotate(img, -self.rotation + angle_offset - self.weapon_angle)
+            img = pygame.transform.rotate(img, -self.angle + angle_offset - self.weapon_angle)
             sword_dist = 25
-            render_pos = (loc[0] - (img.width // 2) + (math.cos(math.radians(self.rotation + self.weapon_angle)) * sword_dist) - offset[0], loc[1] - (img.get_height() // 2) - (math.sin(math.radians(-self.rotation - self.weapon_angle)) * sword_dist) - offset[1])
+            render_pos = (loc[0] - (img.width // 2) + (math.cos(math.radians(self.angle + self.weapon_angle)) * sword_dist) - offset[0], loc[1] - (img.get_height() // 2) - (math.sin(math.radians(-self.angle - self.weapon_angle)) * sword_dist) - offset[1])
             self.game.renderer.blit(img, render_pos)
 
     def debug(self):
