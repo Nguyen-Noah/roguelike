@@ -37,12 +37,12 @@ class Mouse:
         self.pos = (x, y)
 
 class Input:
-    def __init__(self, game):
+    def __init__(self, game, path='data/config/input.json'):
         self.game = game
         self.state = 'main'
         self.text_buffer = None
 
-        self.path = 'data/config/input.json'
+        self.path = path
         self.load_config(self.path)
         self.hidden_keys = ['__backspace']
         

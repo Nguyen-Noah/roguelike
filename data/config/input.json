@@ -5,5 +5,6 @@
     "down": ["keyboard", 115],
     "dash": ["keyboard", 32],
     "attack": ["mouse", 1],
-    "secondary": ["mouse", 3]
+    "secondary": ["mouse", 3],
+    "quit": ["keyboard", 27]
 }

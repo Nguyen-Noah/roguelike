@@ -5,10 +5,14 @@ PATH = 'data/graphics'
 class Assets:
     def __init__(self, game):
         self.game = game
+        self.custom_tile_renders = {}
 
         self.temp = self.load_dir(f'{PATH}/temp')
         self.hair = self.load_dir(f'{PATH}/hair', colorkey=(255, 255, 255))
         self.weapons = self.load_dir(f'{PATH}/weapons')
+
+    def enable(self, *args, **kwargs):
+        pass
 
     def load_dirs(self, path):
         dirs = {}

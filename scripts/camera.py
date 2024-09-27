@@ -97,6 +97,10 @@ class Camera:
         self.update()
         self.true_pos = self.target_pos.copy()
 
+    def move(self, movement):
+        self.camera_offset[0] += movement[0]
+        self.camera_offset[1] += movement[1]
+
     def set_tracked_entity(self, entity):
         self.track_entity = entity
 
@@ -130,8 +134,9 @@ class Camera:
 
         # Core Camera Functionality -------------------------- #
         target = self.target
-        self.camera_offset[0] += math.floor(target[0] - self.camera_offset[0]) / (self.rate / self.game.window.dt)
-        self.camera_offset[1] += math.floor(target[1] - self.camera_offset[1]) / (self.rate / self.game.window.dt)
+        if target:
+            self.camera_offset[0] += math.floor(target[0] - self.camera_offset[0]) / (self.rate / self.game.window.dt)
+            self.camera_offset[1] += math.floor(target[1] - self.camera_offset[1]) / (self.rate / self.game.window.dt)
 
         if self.restriction_point:
             if self.camera_offset[0] + self.game.window.display.get_width() // 2 - self.restriction_point[0] > self.lock_distance[0]:
@@ -150,3 +155,6 @@ class Camera:
     @property
     def pos(self):
         return (int(math.floor(self.camera_offset[0])), int(math.floor(self.camera_offset[1])))
+    
+    def __getitem__(self, item):
+        return self.int_pos[item]
