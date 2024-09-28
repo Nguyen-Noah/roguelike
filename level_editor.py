@@ -1,78 +1,17 @@
 import pygame, sys, math, os, time
 from pygame.locals import *
-from scripts.tilemap import Tilemap, Tile
+from editor_tilemap import Tilemap, Tile
 from scripts.config import config
 from scripts.camera import Camera
 from scripts.input import Input
 from scripts.textbox import Textbox
 from scripts.text import Text as pText
 from scripts.renderer import Renderer
-from scripts.utils import read_tjson, write_tjson, load_img_directory, clip, rectify, read_json, write_json
+from scripts.spritesheets import load_spritesheets
+from scripts.utils import rectify, read_json, write_json
 
 from tkinter import filedialog
 from tkinter import *
-
-def load_spritesheet_config(path):
-    if os.path.isfile(path):
-        config = read_tjson(path, loose=True)
-    else:
-        config = {}
-    write_tjson(path, config)
-    return config
-
-def parse_spritesheet(surf, split_color=(0, 255, 255)):
-    row_start = None
-    loc = [0, 0]
-    tiles = {}
-    for y in range(surf.get_height() - 1):
-        c1 = surf.get_at((1, y))
-        c2 = surf.get_at((1, y + 1))
-        c3 = surf.get_at((0, y + 1))
-        if (c1 == split_color) and (c2 != split_color) and (c3 == split_color):
-            row_start = y
-        if (c1 != split_color) and (c2 == split_color) and (c3 == split_color) and row_start != None:
-            row_bounds_y = (row_start, y)
-            col_start = None
-            for x in range(surf.get_width() - 1):
-                c1 = surf.get_at((x, row_bounds_y[0] + 1))
-                c2 = surf.get_at((x + 1, row_bounds_y[0] + 1))
-                if (c1 == split_color) and (c2 != split_color):
-                    col_start = x
-                if (c1 != split_color) and (c2 == split_color) and col_start != None:
-                    col_bounds_x = (col_start, x)
-                    if col_start == 0:
-                        tile_bounds_y = row_bounds_y
-                    else:
-                        y2 = row_start
-                        while True:
-                            c1 = surf.get_at((col_start + 1, y2))
-                            c2 = surf.get_at((col_start + 1, y2 + 1))
-                            if (c1 != split_color) and (c2 == split_color):
-                                break
-                            y2 += 1
-                        tile_bounds_y = (row_start, y2)
-                    rect = pygame.Rect(col_bounds_x[0] + 1, tile_bounds_y[0] + 1, col_bounds_x[1] - col_bounds_x[0], tile_bounds_y[1] - tile_bounds_y[0])
-                    tiles[tuple(loc)] = clip(surf, rect)
-                    loc[0] += 1
-                    col_start = None
-            loc[1] += 1
-            loc[0] = 0
-            row_start = None
-    return tiles
-
-def load_spritesheets(path, split_color=(0, 255, 255), colorkey=(0, 0, 0)):
-    spritesheets = load_img_directory(path, colorkey=colorkey,alpha=True)
-    for spritesheet in spritesheets:
-        spritesheets[spritesheet] = {
-            'assets': parse_spritesheet(spritesheets[spritesheet], split_color=split_color),
-            'config': load_spritesheet_config(path + '/' + spritesheet + '.json'),
-        }
-        for tile in spritesheets[spritesheet]['assets']:
-            if tile not in spritesheets[spritesheet]['config']:
-                spritesheets[spritesheet]['config'][tile] = {'offset': (0, 0)}
-            if 'offset' not in spritesheets[spritesheet]['config'][tile]:
-                spritesheets[spritesheet]['config'][tile]['offset'] = (0, 0)
-    return spritesheets
 
 KEY_MAPPINGS = {
 	'quit': ['keyboard', 27],
@@ -104,6 +43,12 @@ if not os.path.exists('editor_assets/level_editor_keys.json'):
 if not os.path.exists('editor_assets/level_editor_config.json'):
     write_json('editor_assets/level_editor_config.json', {'tile_size': [16, 16], 'spritesheet_path': None})
 level_editor_config = read_json('editor_assets/level_editor_config.json')
+
+class Assets:
+    def __init__(self, game, spritesheet_path):
+        # dummy class
+        colorkey = (255, 255, 255)
+        self.spritesheets = load_spritesheets(spritesheet_path, colorkey=colorkey) if spritesheet_path else {}
 
 class Draggable:
     def __init__(self, game, pos, radius=10, snap=(8, 8)):
@@ -161,8 +106,7 @@ class Game:
 
         self.camera = Camera(self)
 
-        colorkey = (255, 255, 255)
-        self.spritesheets = load_spritesheets(spritesheet_path, colorkey=colorkey) if spritesheet_path else {}
+        self.assets = Assets(self, spritesheet_path)
 
         self.font_path = 'editor_assets/fonts' if os.path.exists('editor_assets/fonts') else None
         self.text = pText(self, self.font_path)
@@ -171,7 +115,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.spritesheet_thumbs = {}
-        for spritesheet_id, spritesheet in self.spritesheets.items():
+        for spritesheet_id, spritesheet in self.assets.spritesheets.items():
             self.spritesheet_thumbs[spritesheet_id] = self.generate_spritesheet_thumb(spritesheet)
         self.thumb_keys = list(self.spritesheet_thumbs.keys())
         self.menu_scroll = [0, 0, 0]
@@ -213,7 +157,7 @@ class Game:
     def selected_ss(self):
         if len(self.thumb_keys):
             ss_id = self.thumb_keys[self.selected_ss_index]
-            return self.spritesheets[ss_id]
+            return self.assets.spritesheets[ss_id]
         
     @property
     def hovered_loc(self):
@@ -339,7 +283,7 @@ class Game:
         self.renderer.blit(menu_surf, (0, 0), z=999998)
 
         if self.current_tile:
-            tile_img = self.spritesheets[self.current_tile[0]]['assets'][self.current_tile[1]].copy()
+            tile_img = self.assets.spritesheets[self.current_tile[0]]['assets'][self.current_tile[1]].copy()
             tile_img.set_alpha(128)
             if self.grid_mode:
                 pos = (self.hovered_loc[0] * self.tile_size[0] - self.camera[0], self.hovered_loc[1] * self.tile_size[1] - self.camera[1])

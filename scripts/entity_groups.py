@@ -56,7 +56,7 @@ class EntityGroups:
                     self.add(*addition)
                 self.add_queue = []
 
-        self.renderz(offset=self.game.world.camera.int_pos)
+        self.renderz(offset=self.game.camera.int_pos)
 
     def render(self, surf, group=None, offset=(0, 0)):
         if group:

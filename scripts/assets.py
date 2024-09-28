@@ -1,6 +1,8 @@
 import pygame, os
+from .spritesheets import load_spritesheets
 
 PATH = 'data/graphics'
+SPRITESHEET_PATH = 'data/graphics/spritesheets'
 
 class Assets:
     def __init__(self, game):
@@ -10,6 +12,10 @@ class Assets:
         self.temp = self.load_dir(f'{PATH}/temp')
         self.hair = self.load_dir(f'{PATH}/hair', colorkey=(255, 255, 255))
         self.weapons = self.load_dir(f'{PATH}/weapons')
+        self.spritesheets = self.spritesheets = load_spritesheets(SPRITESHEET_PATH, colorkey=(255, 255, 255), scale=self.game.window.scale_ratio) if SPRITESHEET_PATH else {}
+
+        self.custom_tile_renderers = {}
+
 
     def enable(self, *args, **kwargs):
         pass

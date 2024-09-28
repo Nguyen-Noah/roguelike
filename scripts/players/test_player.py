@@ -40,7 +40,7 @@ class Player(RigidBody):
                 movement[1] /= math.sqrt(2)
 
             # -------------------------------- MOUSE ANGLE
-            angle = math.atan2(self.game.input.mouse.pos[1] - self.center[1] + self.game.world.camera.render_offset[1], self.game.input.mouse.pos[0] - self.center[0] + self.game.world.camera.render_offset[0])
+            angle = math.atan2(self.game.input.mouse.pos[1] - self.center[1] + self.game.camera.render_offset[1], self.game.input.mouse.pos[0] - self.center[0] + self.game.camera.render_offset[0])
             self.aim_angle = angle
             if self.weapon:
                 self.weapon.angle = math.degrees(angle)
