@@ -11,6 +11,12 @@ class Player(RigidBody):
         self.hair_gravity = None
         self.weapon = WoodSword(game, 'wood_sword', self)
 
+        self.dash_cd = 0
+        self.dash_direction = 0
+        self.dash_angle = 0
+
+        self.kb_stack = []
+
     def update(self, dt):
         super().update(dt)
 
@@ -53,6 +59,30 @@ class Player(RigidBody):
 
             if self.game.input.holding('attack'):
                 self.weapon.attempt_attack()
+
+            # ---------------------------------- DASH
+            if self.game.input.pressed('dash'):
+                if not self.dash_cd:
+                    self.dash_cd = 1
+                    self.dash_direction = -1 if self.flip[0] else 1
+                    if movement[0] > 0:
+                        self.dash_direction = 1
+                    if movement[0] < 0:
+                        self.dash_direction = -1
+
+                self.kb_stack.append([math.atan2(movement[1], movement[0]), self.data['max_run_speed'] * 300])
+        for knockback in self.kb_stack[::-1]:
+            movement[0] += math.cos(knockback[0]) * knockback[1] * dt
+            movement[1] += math.sin(knockback[0]) * knockback[1] * dt
+            knockback[1] = max(0, knockback[1] - dt * 8000)
+            if not knockback[1]:
+                self.kb_stack.remove(knockback)
+
+        if self.dash_direction:
+            self.dash_angle += self.dash_direction * dt * 20
+            if (self.dash_angle > math.pi * 2) or (self.dash_angle < -math.pi * 2):
+                self.dash_angle = 0
+                self.dash_direction = 0
 
         self.physics_update(movement)
 
