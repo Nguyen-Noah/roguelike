@@ -14,26 +14,26 @@ from tkinter import filedialog
 from tkinter import *
 
 KEY_MAPPINGS = {
-	'quit': ['keyboard', 27],
-    'camera_up': ['keyboard', 119],
-    'camera_left': ['keyboard', 97],
-    'camera_down': ['keyboard', 115],
-    'camera_right': ['keyboard', 100],
-    'select': ['keyboard', 101],
-    'floodfill': ['keyboard', 102],
-    'load': ['keyboard', 105],
-    'save': ['keyboard', 111],
-    'grid_toggle': ['keyboard', 103],
-    'layer_toggle': ['keyboard', 108],
-    'autotile': ['keyboard', 116],
-    'lctrl': ['keyboard', 1073742048],
-    'place': ['mouse', 1],
-    'remove': ['mouse', 3],
-    'layer_up': ['mouse', 4],
-    'layer_down': ['mouse', 5],
-    'custom_data': ['keyboard', 99],
-    'deselect': ['keyboard', 97],
-    'optimize': ['keyboard', 121],
+	'quit': ['keyboard', 27],                   # escape
+    'camera_up': ['keyboard', 119],             # w
+    'camera_left': ['keyboard', 97],            # a
+    'camera_down': ['keyboard', 115],           # s
+    'camera_right': ['keyboard', 100],          # d
+    'select': ['keyboard', 101],                # e
+    'floodfill': ['keyboard', 102],             # f
+    'load': ['keyboard', 105],                  # i
+    'save': ['keyboard', 111],                  # o
+    'grid_toggle': ['keyboard', 103],           # g
+    'layer_toggle': ['keyboard', 108],          # l
+    'autotile': ['keyboard', 116],              # t
+    'lctrl': ['keyboard', 1073742048],          # lctrl
+    'place': ['mouse', 1],                      # left click
+    'remove': ['mouse', 3],                     # right click
+    'layer_up': ['mouse', 4],                   # scroll up
+    'layer_down': ['mouse', 5],                 # scroll down
+    'custom_data': ['keyboard', 99],            # c
+    'deselect': ['keyboard', 97],               # a
+    'optimize': ['keyboard', 121],              # y
 }
 
 if not os.path.exists('editor_assets'):
@@ -76,9 +76,9 @@ class Draggable:
         self.hovered = False
         if self.rect.collidepoint(mpos):
             self.hovered = True
-            if self.game.input.pressed('attack'):
+            if self.game.input.pressed('place'):
                 self.dragging = True
-        if self.game.input.released('attack'):
+        if self.game.input.released('place'):
             self.dragging = False
             self.pos = list(self.snap_pos)
 
@@ -104,7 +104,7 @@ class Game:
 
         self.renderer = Renderer(self)
 
-        self.camera = Camera(self)
+        self.camera = Camera(self, config['window']['resolution'])
 
         self.assets = Assets(self, spritesheet_path)
 

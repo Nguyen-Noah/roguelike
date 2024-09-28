@@ -80,7 +80,6 @@ class Tilemap:
         self.dimensional_lock = True
         self.reset()
 
-
     def reset(self):
         self.grid_tiles = {}
         self.physics_map = {}
@@ -109,12 +108,51 @@ class Tilemap:
             if spawn_hook(tile_data, False):
                 self.insert(Tile(tile_data['group'], tile_id=tuple(tile_data['tile_id']), pos=tuple(tile_data['pos']), layer=tile_data['layer'], custom_data=tile_data['c'] if 'c' in tile_data else ''), ongrid=False, ignore_lock=True)
 
+    # could be made faster by using offsets for each tile test instead of a whole area mask
+    def optimize_area(self, rect, layer=0):
+        masks = self.area_masks(rect)
+        layer_ids = sorted(list(masks))
+        if layer in masks:
+            involved_layers = layer_ids[layer_ids.index(layer) + 1:]
+            if len(involved_layers):
+                # bitwise OR all layers above together
+                combined_mask = masks[involved_layers[0]]
+                for top_layer in involved_layers[1:]:
+                    combined_mask.draw(masks[top_layer], (0, 0))
+                # get map of open space
+                combined_mask.invert()
+                for loc in self.rect_grid_locs(rect):
+                    if loc in self.grid_tiles:
+                        if layer in self.grid_tiles[loc]:
+                            surf = pygame.Surface(rect.size, pygame.SRCALPHA)
+                            tile = self.grid_tiles[loc][layer]
+                            tile.primitive_render(surf, offset=rect.topleft)
+                            tile_mask = pygame.mask.from_surface(surf)
+                            if not tile_mask.overlap_area(combined_mask, (0, 0)):
+                                # the tile is not visible
+                                self.grid_delete(loc, layer=layer)
 
-    def clear(self):
-        self.floor = {}
-        self.walls = {}
-        self.solids = {}
-        self.gaps = {}
+    def area_masks(self, rect):
+        surfs = {}
+        for loc in self.rect_grid_locs(rect):
+            if loc in self.grid_tiles:
+                layers = self.grid_tiles[loc]
+                for layer in layers:
+                    if layer not in surfs:
+                        surfs[layer] = pygame.Surface(rect.size, pygame.SRCALPHA)
+                    tile = layers[layer]
+                    tile.primitive_render(surfs[layer], offset=rect.topleft)
+        masks = {layer: pygame.mask.from_surface(surfs[layer]) for layer in surfs}
+        return masks
+
+    def rect_grid_locs(self, rect):
+        topleft = (rect.x // self.tile_size[0], rect.y // self.tile_size[1])
+        bottomright = (rect.right // self.tile_size[0], rect.bottom // self.tile_size[1])
+        locs = []
+        for y in range(topleft[1], bottomright[1] + 1):
+            for x in range(topleft[0], bottomright[0] + 1):
+                locs.append((x, y))
+        return locs
 
     def count_tiles(self):
         count = {'grid': 0, 'offgrid': len(self.offgrid_tiles.objects)}
@@ -156,6 +194,71 @@ class Tilemap:
                 layers[tile.layer].append(tile)
             
         return layers
+
+    def rect_delete(self, rect, layer=None):
+        topleft = (rect.x // self.tile_size[0], rect.y // self.tile_size[1])
+        bottomright = (rect.right // self.tile_size[0], rect.bottom // self.tile_size[1])
+        
+        for y in range(topleft[1], bottomright[1] + 1):
+            for x in range(topleft[0], bottomright[0] + 1):
+                grid_pos = (x, y)
+                if grid_pos in self.grid_tiles:
+                    tile_r = pygame.Rect(grid_pos[0] * self.tile_size[0], grid_pos[1] * self.tile_size[1], *self.tile_size)
+                    if tile_r.colliderect(rect):
+                        if layer != None:
+                            if layer in self.grid_tiles[grid_pos]:
+                                if grid_pos in self.physics_map:
+                                    for tile in self.physics_map[grid_pos].copy():
+                                        if tile[1] == self.grid_tiles[grid_pos][layer]:
+                                            self.physics_map[grid_pos].remove(tile)
+                                            if not len(self.physics_map[grid_pos]):
+                                                del self.physics_map[grid_pos]
+                                del self.grid_tiles[grid_pos][layer]
+                        else:
+                            del self.grid_tiles[grid_pos]
+                            if grid_pos in self.physics_map:
+                                del self.physics_map[grid_pos]
+                        
+        tiles = self.offgrid_tiles.query(rect)
+        if layer != None:
+            for tile in tiles:
+                if tile.layer == layer:
+                    if tile.rect.colliderect(rect):
+                        self.offgrid_tiles.delete(tile)
+        else:
+            for tile in tiles:
+                if tile.rect.colliderect(rect):
+                    self.offgrid_tiles.delete(tile)
+
+    def in_map(self, gridpos):
+        dimensions_r = pygame.Rect(0, 0, *self.dimensions)
+        return dimensions_r.collidepoint(gridpos)
+
+    def floodfill(self, tile):
+        check_locs = set((tile.grid_pos,))
+        fill_locs = set()
+        borders = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        checks = 0
+        while len(check_locs):
+            for loc in check_locs.copy():
+                valid = True
+                if loc in self.grid_tiles:
+                    if tile.layer in self.grid_tiles[loc]:
+                        valid = False
+                if not self.in_map(loc):
+                    valid = False
+                if valid:
+                    fill_locs.add(loc)
+                    for border in borders:
+                        check_loc = (loc[0] + border[0], loc[1] + border[1])
+                        if check_loc not in fill_locs:
+                            check_locs.add(check_loc)
+                check_locs.remove(loc)
+                checks += 1
+                if len(fill_locs) > 2048:
+                    return
+        for loc in fill_locs:
+            self.insert(tile.shift_clone(loc))
 
     def render_prep(self, rect, offset=(0, 0), group='default'):
         topleft = (rect.x // self.tile_size[0], rect.y // self.tile_size[1])
@@ -207,38 +310,6 @@ class Tilemap:
                 return
             self.offgrid_tiles.add_raw(tile, tile.rect, tag=True)
         return True
-
-    # takes pixel positions, not grid position
-    def get_tiles_around(self, pos):
-        tiles = []
-        tile_loc = (int(pos.x // self.tile_size), int(pos.y // self.tile_size))
-        for offset in NEIGHBOR_OFFSETS:
-            check_loc = f'{str(tile_loc[0] + offset[0])};{str(tile_loc[1] + offset[1])}'
-            if check_loc in self.tilemap:
-                tiles.append(self.tilemap[check_loc])
-        
-        return tiles
-
-    def solids_around(self, pos_px, include_gaps=True):
-        pos = (int(pos_px[0] // self.tile_size), int(pos_px[1] // self.tile_size))
-        solids = []
-        for offset in TILES_AROUND:
-            check = (pos[0] + offset[0], pos[1] + offset[1])
-            if check in self.solids:
-                solids.append(self.solids[check])
-            elif include_gaps and (check in self.gaps):
-                solids.append(self.gaps[check])
-        return solids
-    
-    def physics_rects_around(self, pos):
-        rects = []
-        for tile in self.get_tiles_around(pos):
-            if tile['type'] in PHYSICS_TILES:
-                rects.append(pygame.Rect(tile['pos'][0] * self.tile_size, 
-                                         tile['pos'][1] * self.tile_size, 
-                                         self.tile_size, 
-                                         self.tile_size))
-        return rects
 
     def render(self, surf, offset=(0, 0)):
         for tile in self.offgrid_tiles:
