@@ -53,6 +53,9 @@ class Shortsword(Weapon):
             render_pos = (loc[0] - (img.width // 2) + (math.cos(math.radians(self.angle + self.weapon_angle)) * sword_dist) - offset[0], loc[1] - (img.get_height() // 2) - (math.sin(math.radians(-self.angle - self.weapon_angle)) * sword_dist) - offset[1])
             self.game.renderer.blit(img, render_pos)
 
+        """ img_rect = img.get_rect()
+        pygame.draw.rect(self.game.window.display, 'red', (img_rect[0] + render_pos[0], img_rect[1] + render_pos[1], img_rect[2], img_rect[3]), 4) """
+
     def debug(self):
         print('attacking: ', self.attacking)
         print('')

@@ -3,13 +3,14 @@ from ..rigidbody import RigidBody
 from ..animation import Animation
 from ..weapons.wood_sword import WoodSword
 from ..weapons.iron_axe import IronAxe
+from ..weapons.lava_axe import LavaAxe
 
 class Player(RigidBody):
     def __init__(self, game, type):
         super().__init__(game, type, [40, 40])
         self.game = game
         self.hair_gravity = None
-        self.weapon = WoodSword(game, 'wood_sword', self)
+        self.weapon = LavaAxe(game, 'lava_axe', self)
 
         self.dash_cd = 0
         self.dash_direction = 0
@@ -70,11 +71,11 @@ class Player(RigidBody):
                     if movement[0] < 0:
                         self.dash_direction = -1
 
-                self.kb_stack.append([math.atan2(movement[1], movement[0]), self.data['max_run_speed'] * 300])
+                self.kb_stack.append([math.atan2(movement[1], movement[0]), self.data['max_run_speed'] * 350])
         for knockback in self.kb_stack[::-1]:
             movement[0] += math.cos(knockback[0]) * knockback[1] * dt
             movement[1] += math.sin(knockback[0]) * knockback[1] * dt
-            knockback[1] = max(0, knockback[1] - dt * 8000)
+            knockback[1] = max(0, knockback[1] - dt * 10000)
             if not knockback[1]:
                 self.kb_stack.remove(knockback)
 

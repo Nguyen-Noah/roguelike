@@ -7,7 +7,7 @@ def lerp(a, b, t):
 class Greataxe(Weapon):
     def __init__(self, game, weapon_type, owner):
         super().__init__(game, weapon_type, owner)
-        self.offset = (-12, -10)
+        self.offset = (-26, -25)
         self.swing_speed = 20
 
         self.swing = -1

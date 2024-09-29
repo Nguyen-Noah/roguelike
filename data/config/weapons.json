@@ -8,5 +8,10 @@
         "attack_rate": 0.7,
         "combo": 3,
         "combo_cooldown": 30
+    },
+    "lava_axe": {
+        "attack_rate": 0.7,
+        "combo": 3,
+        "combo_cooldown": 30
     }
 }

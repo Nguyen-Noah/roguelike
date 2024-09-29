@@ -1,5 +1,36 @@
 import pygame, math
-from .utils import ease_out_cubic
+from .utils import ease_out_cubic, advance
+
+class Spark:
+    def __init__(self, game, pos, angle, speed, decay, color=(255, 255, 255), width=0.4, height=5):
+        self.game = game
+        self.pos = pos
+        self.angle = angle
+        self.speed = speed
+        self.decay = decay
+        self.color = color
+        self.width = width
+        self.height = height
+        self.points = []
+
+    def update(self, dt):
+        self.points = []
+        advance(self.pos, self.angle, self.speed)
+        self.speed -= self.decay * dt
+        if self.speed <= 0:
+            return False
+        return True
+    
+    def render(self, offset=(0, 0)):
+        offset_pos = (self.pos[0] - offset[0], self.pos[1] - offset[1])
+        speed = (self.speed * self.height, self.speed * self.width)
+        self.points = [
+            (offset_pos[0] + math.cos(self.angle) * speed[0], offset_pos[1] + math.sin(self.angle) * speed[0]),
+            (offset_pos[0] + math.cos(self.angle + math.pi / 2) * speed[1], offset_pos[1] + math.sin(self.angle + math.pi / 2) * speed[1]),
+            (offset_pos[0] + math.cos(self.angle + math.pi) * speed[0], offset_pos[1] + math.sin(self.angle + math.pi) * speed[0]),
+            (offset_pos[0] + math.cos(self.angle - math.pi / 2) * speed[1], offset_pos[1] + math.sin(self.angle - math.pi / 2) * speed[1]),
+        ]
+        self.game.renderer.renderf(pygame.draw.polygon, self.color, self.points)
 
 class Arc:
     def __init__(self, game, pos, size, width, width_decay, angle, distance=0, color=(255, 255, 255)):
@@ -46,7 +77,8 @@ class Arc:
         self.game.renderer.blit(img, (self.pos[0] - (img.width // 2) + self.blit_pos[0] - offset[0], self.pos[1] - (img.height // 2) - self.blit_pos[1] - offset[1]))
 
 VFX_TYPES = {
-    'arc': Arc
+    'arc': Arc,
+    'spark': Spark
 }
 
 class VFX:
