@@ -55,6 +55,12 @@ class Tilemap:
         
         self.load_map('save')
 
+    def physics_gridtile(self, pos):
+        grid_pos = (pos[0] // self.tile_size[0], pos[1] // self.tile_size[1])
+        if grid_pos in self.physics_map:
+            return self.physics_map[grid_pos][0][2]
+        return None
+
     def clear(self):
         self.floor = {}
         self.walls = {}

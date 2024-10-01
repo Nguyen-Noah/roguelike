@@ -1,5 +1,5 @@
 import random
-from .utils import palette_swap
+from .utils import normalize
 
 PARTICLE_FUNCS = {'behave': {}, 'init': {}}
 ANIMATION_CACHE = {}
@@ -72,4 +72,37 @@ class Particle:
 
         PARTICLE_FUNCS['behave'][self.behavior](self, dt)
 
-        
+        self.next_movement[0] += self.velocity[0] * dt
+        self.next_movement[1] += self.velocity[1] * dt
+
+        self.pos += self.next_movement[0]
+        if self.physics_source:
+            collision = self.physics_source.physics_gridtile(self.pos)
+            if collision and (collision.physics_type == 'solid'):
+                self.velocity[0] *= -self.bounce
+                if self.next_movement[0] > 0:
+                    self.pos[0] = collision.rect.left
+                if self.next_movement[0] < 0:
+                    self.pos[0] = collision.rect.right
+        self.pos[1] += self.next_movement[1]
+        if self.physics_source:
+            collision = self.physics_source.physics_gridtile(self.pos)
+            if collision and (collision.physics_type == 'solid'):
+                self.velocity[1] *= -self.bounce
+                if self.next_movement[1] > 0:
+                    self.pos[1] = collision.rect.top
+                if self.next_movement[1] < 0:
+                    self.pos[1] = collision.rect.bottom
+
+        self.velocity[0] += self.acceleration[0] * dt
+        self.velocity[1] += self.acceleration[1] * dt
+        self.velocity[0] = normalize(self.velocity[0], self.velocity_normalization[0] * dt)
+        self.velocity[1] = normalize(self.velocity[1], self.velocity_normalization[1] * dt)
+        self.velocity[0] = max(-self.terminal[0], min(self.terminal[0], self.velocity[0]))
+        self.velocity[0] = max(-self.terminal[1], min(self.terminal[1], self.velocity[1]))
+        self.next_movement = [0, 0]
+        return self.animation.finished
+    
+    def renderz(self, group='default', offset=(0, 0)):
+        img = self.animation.img
+        self.game.renderer.blit(img, (self.pos[0] - offset[0] - (img.width // 2), self.pos[1] - offset[1] - (img.height // 2)))
