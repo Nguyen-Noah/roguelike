@@ -355,7 +355,7 @@ class Game:
                 if self.selection_rect:
                     self.tilemap.optimize_area(layer=self.layer, rect=self.selection_rect)
         if self.input.pressed('save'):
-            self.tilemap.save('save.pmap')
+            self.tilemap.save('data/maps/save.pmap')
         if self.input.pressed('load'):
             root = Tk()
             root.withdraw()

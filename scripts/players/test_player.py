@@ -10,7 +10,7 @@ class Player(RigidBody):
         super().__init__(game, type, [40, 40])
         self.game = game
         self.hair_gravity = None
-        self.weapon = LavaAxe(game, 'lava_axe', self)
+        self.weapon = WoodSword(game, 'wood_sword', self)
 
         self.dash_cd = 0
         self.dash_direction = 0

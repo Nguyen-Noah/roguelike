@@ -10,13 +10,13 @@ def basic_tile_render(tile, offset=(0, 0), group='default'):
 
 
 class Tile:
-    def __init__(self, parent, tile_type, pos, wall=False, variant=None, z_offset=0, overhang=False):
+    def __init__(self, parent, tile_type, pos, wall=False, variant=None, z_offset=0, group='default'):
         self.parent = parent
         self.pos = pos
         self.type = tile_type
         self.wall = wall
         self.z_offset = z_offset
-        self.overhang = overhang
+        self.group = group
 
         self.variant = variant
 
@@ -41,7 +41,7 @@ class Tile:
         else:
             img = self.parent.game.assets.images['tiles'][self.type]
         
-        self.parent.game.renderer.blit(img, rpos, z=z)
+        self.parent.game.renderer.blit(img, rpos, z=z, group=self.group)
 
 class Tilemap:
     def __init__(self, game, tile_size=(16, 16), dimensions=(16, 16)):
@@ -101,7 +101,7 @@ class Tilemap:
             tile = map_data['offgrid_tiles']['objects'][obj_id]
             tile_id = tuple(tile['tile_id'])
             img = self.game.assets.spritesheets[tile['group']]['assets'][tile_id]
-            group_conf = self.game.assets.spritesheets[tile['group']['config']]
+            group_conf = self.game.assets.spritesheets[tile['group']]['config']
             tile_conf = {}
             if tile_id in group_conf:
                 tile_conf = group_conf[tile_id]
@@ -124,6 +124,9 @@ class Tilemap:
                 if tile_id in group_conf:
                     tile_conf = group_conf[tile_id]
                     categories = ['floor']
+
+                    render_group = 'default'
+
                     if 'categories' in tile_conf:
                         categories = tile_conf['categories']
                     if 'solid' in categories:
@@ -131,33 +134,7 @@ class Tilemap:
                     if 'floor' in categories:
                         # don't overwrite 'backwall' tiles
                         if (loc not in self.floor) and (loc not in self.walls):
-                            self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id)
-                    if 'backwall' in categories:
-                        self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id)
-                        self.solids[loc] = self.floor[loc]
-                        self.minimap_base.set_at(loc, (67, 51, 87))
-                    if 'wall' in categories:
-                        self.walls[loc] = Tile(self, tile['group'], loc, variant=tile_id, wall=True)
-                        self.solids[loc] = self.walls[loc]
-                        self.minimap_base.set_at(loc, (67, 51, 87))
-                    if 'overhang' in categories:
-                        self.walls[loc] = Tile(self, tile['group'], loc, variant=tile_id, wall=True, overhang=True)
-                    if 'cliff' in categories:
-                        self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id)
-                        self.gaps[loc] = self.floor[loc]
-                        self.minimap_base.set_at(loc, (74, 156, 223))
-                    if 'spawn' in categories:
-                        self.spawn = (tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size)
-                    if 'respawn' in categories:
-                        self.respawn = (tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size)
-                    if 'exit' in categories:
-                        self.exit = (tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size)
-                    if 'shop' in categories:
-                        self.shops.append((tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size))
-                    if 'weapon' in categories:
-                        self.weapon_shops.append((tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size))
-                    if 'block_decor' in categories:
-                        self.decor_block[loc] = True
+                            self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id, group=render_group)
 
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):

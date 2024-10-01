@@ -2,7 +2,7 @@ import moderngl, pygame
 import numpy as np
 from array import array
 from .render_object import RenderObject
-
+from .lib import GaussianBlur
 
 def read_f(path):
     f = open(f'scripts/mgl/shaders/{path}.glsl', 'r')
@@ -28,8 +28,8 @@ default_frag_shader = '''
 
 uniform sampler2D surface;
 
-out vec4 f_color;
 in vec2 uv;
+out vec4 f_color;
 
 void main() {
   f_color = vec4(texture(surface, uv).rgb, 1.0);
@@ -63,7 +63,7 @@ class MGL():
     def initialize(self):
         # CREATE ALL SHADER PROGRAMS/FRAMEBUFFERS ---------- #
         self.default_shader = RenderObject(self, self.default_frag, self.default_vert, vao_args=['2f 2f', 'vert', 'texcoord'], buffer=None)
-        #self.test_shader = self.create_render_object('test', 'vert')
+        self.blur = GaussianBlur(self)
 
     def default_ro(self):
         return RenderObject(self.default_frag, default_ro=True)
@@ -108,6 +108,7 @@ class MGL():
         self.default_shader.render(uniforms={
             'surface': surface
         })
+        #self.blur.render(surface)
 
         self.ctx.disable(moderngl.BLEND)
         pygame.display.flip()
