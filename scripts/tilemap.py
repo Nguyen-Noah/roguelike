@@ -23,13 +23,13 @@ def create_tile_quad(tile_pos, tile_size):
 
 
 class Tile:
-    def __init__(self, parent, tile_type, pos, wall=False, variant=None, z_offset=0, group='default'):
+    def __init__(self, parent, tile_type, pos, wall=False, variant=None, z_offset=0, program=None):
         self.parent = parent
         self.pos = pos
         self.type = tile_type
         self.wall = wall
         self.z_offset = z_offset
-        self.group = group
+        self.program = program
 
         self.variant = variant
 
@@ -47,23 +47,12 @@ class Tile:
             (self.pos[1] * self.parent.game.window.scale_ratio) * self.parent.tile_size[1] - offset[1]
         )
 
-        """ quad_verticies = create_tile_quad(rpos, self.parent.tile_size)
-        vbo = self.parent.game.mgl.ctx.buffer(data=array('f', quad_verticies)) """
-
         if self.variant:
             texture = self.parent.game.assets.spritesheets[self.type]['assets'][self.variant]
         else:
             texture = self.parent.game.assets.images['tiles'][self.type]
 
-        """ texture.use()
-        vao = self.parent.game.mgl.ctx.simple_vertex_array(self.parent.game.mgl.basic_render, vbo, 'vert', 'texcoord')
-        vao.render(moderngl.TRIANGLE_FAN)
-
-        #self.parent.game.renderer.blit(img, rpos, z=z, group=self.group) """
-
-        self.parent.game.mgl.basic_render.render(uniforms={
-            'surface': texture
-        })
+        self.program.render(texture)
 
 class Tilemap:
     def __init__(self, game, tile_size=(16, 16), dimensions=(16, 16)):
@@ -147,7 +136,7 @@ class Tilemap:
                     tile_conf = group_conf[tile_id]
                     categories = ['floor']
 
-                    render_group = 'default'
+                    program = self.game.mgl.block_program
 
                     if 'categories' in tile_conf:
                         categories = tile_conf['categories']
@@ -156,7 +145,7 @@ class Tilemap:
                     if 'floor' in categories:
                         # don't overwrite 'backwall' tiles
                         if (loc not in self.floor) and (loc not in self.walls):
-                            self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id, group=render_group)
+                            self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id, program=program)
 
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
@@ -176,7 +165,7 @@ class Tilemap:
         return False
 
     def render(self):
-        self.game.mgl.basic_render.update(uniforms={
+        self.game.mgl.block_program.update(uniforms={
             'projection': self.game.mgl.projection_matrix
         })
 
