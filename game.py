@@ -1,4 +1,5 @@
 from scripts.window import Window
+from scripts.mgl import MGL
 from scripts.input import Input
 from scripts.renderer import Renderer
 from scripts.world import World
@@ -11,6 +12,7 @@ from scripts.entity_groups import EntityGroups
 class Game:
     def __init__(self):
         self.window = Window(self)
+        self.mgl = MGL(self)
         self.entity_groups = EntityGroups(self)
         self.entity_db = EntityDB(path='data/graphics/entities')
         self.assets = Assets(self)
@@ -24,6 +26,7 @@ class Game:
 
     def update(self):
         self.input.update()
+        self.mgl.render(self.window.display, self.window.time, self.input.mouse.pos)
         self.window.render_frame()
         self.world.update()
         self.camera.update()

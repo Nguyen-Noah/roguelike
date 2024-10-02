@@ -37,7 +37,8 @@ void main() {
 '''
 
 class MGL():
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         self.ctx = moderngl.create_context(require=330)
         self.quad_buffer = self.ctx.buffer(data=array('f', [
             # position (x, y), uv coords (x, y)
@@ -60,10 +61,23 @@ class MGL():
 
         self.initialize()
 
+    @property
+    def projection_matrix(self):
+        left = self.game.camera.camera_offset[0]
+        right = left + self.game.window.resolution[0]
+        bottom = self.game.camera.camera_offset[1]
+        top = bottom + self.game.window.resolution[1]
+
+        return np.array([
+            [2 / (right - left), 0, 0, -(right + left) / (right - left)],
+            [0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)],
+            [0, 0, -1, 0],
+            [0, 0, 0, 1]
+        ], dtype='f4')
+
     def initialize(self):
         # CREATE ALL SHADER PROGRAMS/FRAMEBUFFERS ---------- #
-        self.default_shader = RenderObject(self, self.default_frag, self.default_vert, vao_args=['2f 2f', 'vert', 'texcoord'], buffer=None)
-        self.blur = GaussianBlur(self)
+        self.basic_render = self.create_render_object('default', 'vsDefault')
 
     def default_ro(self):
         return RenderObject(self.default_frag, default_ro=True)
@@ -105,10 +119,7 @@ class MGL():
         self.ctx.enable(moderngl.BLEND)
 
         # rendering pipeline --------------- #
-        self.default_shader.render(uniforms={
-            'surface': surface
-        })
-        #self.blur.render(surface)
+        self.game.world.tilemap.render()
 
         self.ctx.disable(moderngl.BLEND)
         pygame.display.flip()

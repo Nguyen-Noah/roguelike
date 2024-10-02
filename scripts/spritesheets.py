@@ -9,7 +9,7 @@ def load_spritesheet_config(path):
     write_tjson(path, config)
     return config
 
-def parse_spritesheet(surf, split_color=(0, 255, 255), scale=None):
+def parse_spritesheet(surf, pg2tex, split_color=(0, 255, 255), scale=None):
     row_start = None
     loc = [0, 0]
     tiles = {}
@@ -42,9 +42,13 @@ def parse_spritesheet(surf, split_color=(0, 255, 255), scale=None):
                         tile_bounds_y = (row_start, y2)
                     rect = pygame.Rect(col_bounds_x[0] + 1, tile_bounds_y[0] + 1, col_bounds_x[1] - col_bounds_x[0], tile_bounds_y[1] - tile_bounds_y[0])
                     img = clip(surf, rect)
+
                     if scale:
                         img = pygame.transform.scale(img, (img.width * scale, img.height * scale))
-                    tiles[tuple(loc)] = img
+
+                    texture = pg2tex(img)
+
+                    tiles[tuple(loc)] = texture
                     loc[0] += 1
                     col_start = None
             loc[1] += 1
@@ -52,16 +56,19 @@ def parse_spritesheet(surf, split_color=(0, 255, 255), scale=None):
             row_start = None
     return tiles
 
-def load_spritesheets(path, split_color=(0, 255, 255), colorkey=(0, 0, 0), scale=None):
+def load_spritesheets(pg2tex, path, split_color=(0, 255, 255), colorkey=(0, 0, 0), scale=None):
     spritesheets = load_img_directory(path, colorkey=colorkey,alpha=True)
+
     for spritesheet in spritesheets:
         spritesheets[spritesheet] = {
-            'assets': parse_spritesheet(spritesheets[spritesheet], split_color=split_color, scale=scale),
+            'assets': parse_spritesheet(spritesheets[spritesheet], pg2tex, split_color=split_color, scale=scale),
             'config': load_spritesheet_config(path + '/' + spritesheet + '.json'),
         }
+
         for tile in spritesheets[spritesheet]['assets']:
             if tile not in spritesheets[spritesheet]['config']:
                 spritesheets[spritesheet]['config'][tile] = {'offset': (0, 0)}
             if 'offset' not in spritesheets[spritesheet]['config'][tile]:
                 spritesheets[spritesheet]['config'][tile]['offset'] = (0, 0)
+
     return spritesheets

@@ -28,7 +28,10 @@ class RenderObject:
                     self.program[uniform].value = tex_id
                     tex_id += 1
                 else:
-                    self.program[uniform].value = uniforms[uniform]
+                    if uniform == 'projection':
+                        self.program[uniform].write(uniforms[uniform].astype('f4').tobytes())
+                    else:
+                        self.program[uniform].value = uniforms[uniform]
                     
     def parse_uniforms(self, uniforms):
         for name, value in uniforms.items():

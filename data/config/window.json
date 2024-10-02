@@ -1,6 +1,6 @@
 {
     "resolution": [1080, 720],
-    "fps": 60,
+    "fps": 10000,
     "scale_ratio": 3,
     "title": "placeholder"
 }

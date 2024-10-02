@@ -1,6 +1,5 @@
 import pygame, time
 from .config import config
-from .mgl.mgl import MGL
 
 class Window:
     def __init__(self, game):
@@ -33,7 +32,6 @@ class Window:
         # blitting surfs
         self.screen = pygame.display.set_mode(self.resolution, pygame.OPENGL | pygame.DOUBLEBUF)
         self.display = pygame.Surface(self.resolution)
-        self.mgl = MGL()
 
     @property
     def fps(self):
@@ -44,8 +42,6 @@ class Window:
         self.frame_log.append(self.dt)
         self.frame_log = self.frame_log[-60:]
         self.last_frame = time.time()
-
-        self.mgl.render(self.display, self.time, self.game.input.mouse.pos)
         self.clock.tick(self.fps_cap)
         self.display.fill((0, 0, 0))
         self.time = time.time()

@@ -1,4 +1,4 @@
-import pygame, os
+import pygame, os, moderngl
 from .spritesheets import load_spritesheets
 
 PATH = 'data/graphics'
@@ -12,7 +12,7 @@ class Assets:
         self.temp = self.load_dir(f'{PATH}/temp')
         self.hair = self.load_dir(f'{PATH}/hair', colorkey=(255, 255, 255))
         self.weapons = self.load_dir(f'{PATH}/weapons')
-        self.spritesheets = self.spritesheets = load_spritesheets(SPRITESHEET_PATH, colorkey=(255, 255, 255), scale=self.game.window.scale_ratio) if SPRITESHEET_PATH else {}
+        self.spritesheets = self.spritesheets = load_spritesheets(self.pg2tex, SPRITESHEET_PATH, colorkey=(255, 255, 255), scale=self.game.window.scale_ratio) if SPRITESHEET_PATH else {}
 
         self.custom_tile_renderers = {}
 
@@ -27,13 +27,21 @@ class Assets:
         return dirs
 
     def load_dir(self, path, colorkey=(0, 0, 0)):
-        image_dir = {}
+        texture_dir = {}
         for file in os.listdir(path):
-            image_dir[file.split('.')[0]] = self.load_img(path + '/' + file, colorkey=colorkey)
-        return image_dir
+            texture_dir[file.split('.')[0]] = self.load_img(path + '/' + file, colorkey=colorkey)
+        return texture_dir
     
     def load_img(self, path, colorkey=(0, 0, 0)):
         img = pygame.image.load(path).convert_alpha()
         img = pygame.transform.scale(img, (img.width * self.game.window.scale_ratio, img.height * self.game.window.scale_ratio))
         img.set_colorkey(colorkey)
-        return img
+        texture = self.pg2tex(img)
+        return texture
+    
+    def pg2tex(self, surf):
+        w, h = surf.get_size()
+        tex_data = pygame.image.tobytes(surf, 'RGBA', 1)
+        tex = self.game.mgl.ctx.texture((w, h), 4, tex_data)
+        tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        return tex

@@ -1,4 +1,5 @@
-import pygame, random
+import pygame, random, moderngl
+from array import array
 from .quads import Quads
 from .utils import write_tjson, read_tjson
 
@@ -7,6 +8,18 @@ RANDOMIZE_GROUPS = {}
 
 def basic_tile_render(tile, offset=(0, 0), group='default'):
     tile.renderer.blit(tile.img, (tile.raw_pos[0] + tile.offset[0] - offset[0], tile.raw_pos[1] + tile.offset[1] - offset[1]), z=tile.layer, group=group)
+
+def create_tile_quad(tile_pos, tile_size):
+    x, y = tile_pos
+    w, h = tile_size
+
+    verticies = [
+        x, y, 0.0, 0.0,
+        x + w, y, 1.0, 0.0,
+        x + w, y + h, 1.0, 1.0,
+        x, y + h, 0.0, 1.0
+    ]
+    return verticies
 
 
 class Tile:
@@ -29,19 +42,28 @@ class Tile:
         return pygame.Rect(self.pos[0] * self.parent.tile_size, self.pos[1] * self.parent.tile_size, self.parent.tile_size, self.parent.tile_size)
 
     def render(self, offset):
-        rpos = ((self.pos[0] * self.parent.game.window.scale_ratio) * self.parent.tile_size[0] - offset[0], (self.pos[1] * self.parent.game.window.scale_ratio) * self.parent.tile_size[1] - offset[1])
+        rpos = (
+            (self.pos[0] * self.parent.game.window.scale_ratio) * self.parent.tile_size[0] - offset[0],
+            (self.pos[1] * self.parent.game.window.scale_ratio) * self.parent.tile_size[1] - offset[1]
+        )
 
-        z = -99999
-        if self.wall:
-            z = self.pos[1] + 1
-        z += self.z_offset
+        """ quad_verticies = create_tile_quad(rpos, self.parent.tile_size)
+        vbo = self.parent.game.mgl.ctx.buffer(data=array('f', quad_verticies)) """
 
         if self.variant:
-            img = self.parent.game.assets.spritesheets[self.type]['assets'][self.variant]
+            texture = self.parent.game.assets.spritesheets[self.type]['assets'][self.variant]
         else:
-            img = self.parent.game.assets.images['tiles'][self.type]
-        
-        self.parent.game.renderer.blit(img, rpos, z=z, group=self.group)
+            texture = self.parent.game.assets.images['tiles'][self.type]
+
+        """ texture.use()
+        vao = self.parent.game.mgl.ctx.simple_vertex_array(self.parent.game.mgl.basic_render, vbo, 'vert', 'texcoord')
+        vao.render(moderngl.TRIANGLE_FAN)
+
+        #self.parent.game.renderer.blit(img, rpos, z=z, group=self.group) """
+
+        self.parent.game.mgl.basic_render.render(uniforms={
+            'surface': texture
+        })
 
 class Tilemap:
     def __init__(self, game, tile_size=(16, 16), dimensions=(16, 16)):
@@ -154,9 +176,14 @@ class Tilemap:
         return False
 
     def render(self):
+        self.game.mgl.basic_render.update(uniforms={
+            'projection': self.game.mgl.projection_matrix
+        })
+
         cam_r = self.game.camera.rect
         tl = (cam_r.left // (self.tile_size[0] * self.game.window.scale_ratio), cam_r.top // (self.tile_size[1] * self.game.window.scale_ratio) - 1)
         br = (cam_r.right // self.tile_size[0], cam_r.bottom // self.tile_size[1])
+
         for y in range(tl[1], br[1] + 1):
             for x in range(tl[0], br[0] + 1):
                 if (x, y) in self.floor:
