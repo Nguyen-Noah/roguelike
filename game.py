@@ -31,8 +31,6 @@ class Game:
         self.renderer.cycle({
             'default': self.window.display
             })
-        
-        print(self.input.holding('down'))
 
     def run(self):
         while True:
