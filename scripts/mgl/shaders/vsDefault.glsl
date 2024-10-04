@@ -3,11 +3,14 @@
 in vec2 vert;
 in vec2 texcoord;
 
-uniform mat4 projection;
+uniform vec2 tile_pos;
 
 out vec2 uv;
 
 void main() {
     uv = texcoord;
-    gl_Position = projection * vec4(vert, 0.0, 1.0);
+
+    vec4 world_pos = vec4(vert + tile_pos, 0.0, 1.0);
+    //gl_Position = projection * world_pos;
+    gl_Position = world_pos;
 }

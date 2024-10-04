@@ -1,4 +1,5 @@
-import pygame, random, moderngl
+import pygame, random
+import numpy as np
 from array import array
 from .quads import Quads
 from .utils import write_tjson, read_tjson
@@ -23,14 +24,27 @@ def create_tile_quad(tile_pos, tile_size):
 
 
 class Tile:
-    def __init__(self, parent, tile_type, pos, wall=False, variant=None, z_offset=0, program=None):
-        self.parent = parent
+    def __init__(self, game, tile_type, pos, tile_size=(16, 16), wall=False, variant=None, z_offset=0, program=None):
+        self.game = game
         self.pos = pos
         self.type = tile_type
         self.wall = wall
+        self.tile_size = tile_size
         self.z_offset = z_offset
         self.program = program
 
+        self.renderer = self.game.mgl.tile
+        # since the scale ratio is 3, we'll divide all cartesian x-axes by 3/2 (1.5) and then multiply that by the tilesize, which is 16
+        # in order to properly scale things without messing up the texture, only touch the cartesian stuff
+        vertices = self.game.mgl.ctx.buffer(array('f', [
+            # position (x, y), uv coords (x, y)
+            -1.0/(1.5 * 16), 1.0/16, 0.0, 0.0,  # topleft
+            1.0/(1.5 * 16), 1.0/16, 1.0, 0.0,   # topright
+            -1.0/(1.5 * 16), -1.0/16, 0.0, 1.0, # bottomleft
+            1.0/(1.5 * 16), -1.0/16, 1.0, 1.0,  # bottomright
+        ]).tobytes())
+        self.renderer.vbo = vertices
+        self.renderer.create_vao()
         self.variant = variant
 
         if self.type in RANDOMIZE_GROUPS:
@@ -39,20 +53,30 @@ class Tile:
 
     @property
     def rect(self):
-        return pygame.Rect(self.pos[0] * self.parent.tile_size, self.pos[1] * self.parent.tile_size, self.parent.tile_size, self.parent.tile_size)
+        return pygame.Rect(
+            self.pos[0] * self.tile_size[0], 
+            self.pos[1] * self.tile_size[1], 
+            self.tile_size[0], 
+            self.tile_size[1]
+            )
 
-    def render(self, offset):
+    def render(self):
         rpos = (
-            (self.pos[0] * self.parent.game.window.scale_ratio) * self.parent.tile_size[0] - offset[0],
-            (self.pos[1] * self.parent.game.window.scale_ratio) * self.parent.tile_size[1] - offset[1]
+            self.pos[0] * self.tile_size[0],
+            self.pos[1] * self.tile_size[1]
         )
 
         if self.variant:
-            texture = self.parent.game.assets.spritesheets[self.type]['assets'][self.variant]
+            texture = self.game.assets.spritesheets[self.type]['assets'][self.variant]
         else:
-            texture = self.parent.game.assets.images['tiles'][self.type]
+            texture = self.game.assets.images['tiles'][self.type]
 
-        self.program.render(texture)
+        uniforms = {
+            'surface': texture,
+            'tile_pos': np.array((random.random(), random.random()), dtype='f4')
+        }
+
+        self.renderer.render(uniforms=uniforms)
 
 class Tilemap:
     def __init__(self, game, tile_size=(16, 16), dimensions=(16, 16)):
@@ -93,10 +117,10 @@ class Tilemap:
             for layer in data['grid_tiles'][loc]:
                 tile_data = data['grid_tiles'][loc][layer]
                 if spawn_hook(tile_data, True):
-                    self.insert(Tile(self, tile_data['group'], tile_id=tuple(tile_data['tile_id']), pos=tuple(tile_data['pos']), layer=tile_data['layer'], custom_data=tile_data['c'] if 'c' in tile_data else ''))
+                    self.insert(Tile(self.game, tile_data['group'], tile_id=tuple(tile_data['tile_id']), pos=tuple(tile_data['pos']), layer=tile_data['layer'], custom_data=tile_data['c'] if 'c' in tile_data else ''))
         for tile_data in data['offgrid_tiles']['objects'].values():
             if spawn_hook(tile_data, False):
-                self.insert(Tile(self, tile_data['group'], tile_id=tuple(tile_data['tile_id']), pos=tuple(tile_data['pos']), layer=tile_data['layer'], custom_data=tile_data['c'] if 'c' in tile_data else ''), ongrid=False, ignore_lock=True)
+                self.insert(Tile(self.game, tile_data['group'], tile_id=tuple(tile_data['tile_id']), pos=tuple(tile_data['pos']), layer=tile_data['layer'], custom_data=tile_data['c'] if 'c' in tile_data else ''), ongrid=False, ignore_lock=True)
 
     def load_map(self, map_name):
         self.clear()
@@ -136,21 +160,21 @@ class Tilemap:
                     tile_conf = group_conf[tile_id]
                     categories = ['floor']
 
-                    program = self.game.mgl.block_program
+                    #program = self.game.mgl.block_program
 
                     if 'categories' in tile_conf:
                         categories = tile_conf['categories']
                     if 'solid' in categories:
-                        self.solids[loc] = Tile(self, tile['group'], loc, variant=tile_id)
+                        self.solids[loc] = Tile(self.game, tile['group'], loc, variant=tile_id)
                     if 'floor' in categories:
                         # don't overwrite 'backwall' tiles
                         if (loc not in self.floor) and (loc not in self.walls):
-                            self.floor[loc] = Tile(self, tile['group'], loc, variant=tile_id, program=program)
+                            self.floor[loc] = Tile(self.game, tile['group'], loc, variant=tile_id)
 
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 if not any([(x, y) in section for section in [self.walls, self.solids, self.floor, self.gaps]]):
-                    self.gaps[(x, y)] = Tile(self, 'water_wall', (x, y))
+                    self.gaps[(x, y)] = Tile(self.game, 'water_wall', (x, y))
                     self.minimap_base.set_at((x, y), (74, 156, 223))
 
         # generate wall map
@@ -165,10 +189,6 @@ class Tilemap:
         return False
 
     def render(self):
-        self.game.mgl.block_program.update(uniforms={
-            'projection': self.game.mgl.projection_matrix
-        })
-
         cam_r = self.game.camera.rect
         tl = (cam_r.left // (self.tile_size[0] * self.game.window.scale_ratio), cam_r.top // (self.tile_size[1] * self.game.window.scale_ratio) - 1)
         br = (cam_r.right // self.tile_size[0], cam_r.bottom // self.tile_size[1])
@@ -176,4 +196,4 @@ class Tilemap:
         for y in range(tl[1], br[1] + 1):
             for x in range(tl[0], br[0] + 1):
                 if (x, y) in self.floor:
-                    self.floor[(x, y)].render(cam_r.topleft)
+                    self.floor[(x, y)].render()

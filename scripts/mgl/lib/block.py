@@ -5,7 +5,8 @@ class Block:
     def update(self, uniforms={}):
         self.base.update(uniforms=uniforms)
 
-    def render(self, surface, dest=None):
+    def render(self, uniforms, dest=None):
         self.base.render(dest=dest, uniforms={
-            'surface': surface
+            'surface': uniforms['surface'],
+            'projection': uniforms['projection']
         })

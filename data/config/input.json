@@ -6,5 +6,7 @@
     "dash": ["keyboard", 32],
     "attack": ["mouse", 1],
     "secondary": ["mouse", 3],
-    "quit": ["keyboard", 27]
+    "quit": ["keyboard", 27],
+    "zoom_in": ["mouse", 4],
+    "zoom_out": ["mouse", 5]
 }

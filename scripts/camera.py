@@ -1,4 +1,5 @@
 import pygame, math
+from .utils import clamp_between
 
 class Camera:
     def __init__(self, game, size):
@@ -13,6 +14,7 @@ class Camera:
         self.mode = None
         self.screen_shake = 0
         self.shake_amount = 'medium'
+        self.zoom = 1
 
     @property
     def rect(self):
@@ -51,12 +53,6 @@ class Camera:
     def update(self):
         self.int_pos = (int(self.camera_offset[0]), int(self.camera_offset[1]))
 
-        """ if self.screen_shake:
-            amt = config['camera'][self.shake_amount]
-            self.true_pos[0] += random.randint(0, amt*2) - amt
-            self.true_pos[1] += random.randint(0, amt*2) - amt
-            self.screen_shake -= 1 """
-
         # Core Camera Functionality -------------------------- #
         target = self.target
         if target:
@@ -72,6 +68,12 @@ class Camera:
                 self.camera_offset[1] = self.restriction_point[1] - self.game.window.display.get_height() // 2 + self.lock_distance[1]
             if self.camera_offset[1] + self.game.window.display.get_height() // 2 - self.restriction_point[1] < -self.lock_distance[1]:
                 self.camera_offset[1] = self.restriction_point[1] - self.game.window.display.get_height() // 2 - self.lock_distance[1]
+        
+        if self.game.input.pressed('zoom_in'):
+            self.zoom += 1
+        if self.game.input.pressed('zoom_out'):
+            self.zoom -= 1
+        self.zoom = clamp_between(self.zoom, 1, 10)
 
     @property
     def render_offset(self):

@@ -37,6 +37,8 @@ def load_img(path, alpha=False, colorkey=None):
         img.set_colorkey(colorkey)
     return img
 
+def clamp_between(value, min_offset=1, max_offset=4):
+    return max(min_offset, min(value, max_offset))
 
 # assets
 def recursive_file_op(path, func, game=None, filetype=None):

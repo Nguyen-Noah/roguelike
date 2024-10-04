@@ -1,7 +1,7 @@
 import moderngl, pygame
 import numpy as np
 from array import array
-from .render_object import RenderObject
+from .render_object import RenderObject, Renderer
 from .lib import Block
 
 def read_f(path):
@@ -63,11 +63,14 @@ class MGL():
 
     @property
     def projection_matrix(self):
-        left = self.game.camera.camera_offset[0]
-        right = left + self.game.window.resolution[0]
-        bottom = self.game.camera.camera_offset[1]
-        top = bottom + self.game.window.resolution[1]
+        c = self.game.camera
+        # Define the left, right, top, bottom for the orthographic view
+        left = c.camera_offset[0]
+        right = left + self.game.window.resolution[0] / c.zoom
+        bottom = c.camera_offset[1]
+        top = bottom + self.game.window.resolution[1] / c.zoom
 
+        # Orthographic projection matrix
         return np.array([
             [2 / (right - left), 0, 0, -(right + left) / (right - left)],
             [0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)],
@@ -77,7 +80,8 @@ class MGL():
 
     def initialize(self):
         # CREATE ALL SHADER PROGRAMS/FRAMEBUFFERS ---------- #
-        self.block_program = Block(self)
+        tile = self.ctx.program(fragment_shader=read_f('default'), vertex_shader=read_f('vsDefault'))
+        self.tile = Renderer(self, tile)
 
     def default_ro(self):
         return RenderObject(self.default_frag, default_ro=True)
@@ -119,6 +123,9 @@ class MGL():
         self.ctx.enable(moderngl.BLEND)
 
         # rendering pipeline --------------- #
+        """ self.block_program.update(uniforms={
+            'projection': self.projection_matrix
+        }) """
         self.game.world.tilemap.render()
 
         self.ctx.disable(moderngl.BLEND)
